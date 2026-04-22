@@ -26,6 +26,7 @@ jobs:
         python-version: "3.11"
 
     - name: Build and inspect package
+      id: build
       uses: hynek/build-and-inspect-python-package@v2
 
     - name: Detect pre-release
@@ -42,7 +43,10 @@ jobs:
       if: steps.prerelease.outputs.is_prerelease == 'true'
       run: |
         pip install twine
-        twine upload --repository testpypi dist/* \
+        twine upload \
+          ${{ steps.build.outputs.sdist }} \
+          ${{ steps.build.outputs.wheel }} \
+          --repository testpypi \
           --username __token__ \
           --password ${{ secrets.TEST_PYPI_TOKEN }} \
           --skip-existing
@@ -58,8 +62,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          dist/*.whl
-          dist/*.tar.gz
+          ${{ steps.build.outputs.sdist }}
+          ${{ steps.build.outputs.wheel }}
         body_path: CHANGELOG.md
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
