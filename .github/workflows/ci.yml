@@ -63,8 +63,19 @@ jobs:
     name: Lint Documentation
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Check README formatting
-      run: |
-        pip install readme-renderer[md]
-        python -m readme_renderer README.md --check
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build + twine
+        run: |
+          pip install build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Validate README and metadata
+        run: twine check dist/*
