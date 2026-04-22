@@ -1,3 +1,8 @@
+## v0.1.6-alpha2 - 2026-04-23
+
+- fix: sync pyproject version with latest release
+
+
 ## v0.1.0-alpha1 - 2026-04-23
 
 - style: apply ruff safe fix
