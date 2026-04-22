@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION_FILE="zomi_nlp/version.py"
+VERSION_FILE="pyproject.toml"
 CHANGELOG_FILE="CHANGELOG.md"
 
 # --- SAFETY CHECKS ---------------------------------------------------------
 
-# Ensure working tree is clean
-if [[ -n "$(git status --porcelain)" ]]; then
+if [[ -n "$(git.status --porcelain)" ]]; then
   echo "Error: Working tree is dirty. Commit or stash changes first."
   exit 1
 fi
 
-# Ensure bump type is provided
 if [[ -z "$1" ]]; then
   echo "Usage: bump_version.sh [major|minor|patch|prealpha|prebeta|prerc]"
   exit 1
@@ -22,7 +20,7 @@ BUMP_TYPE=$1
 
 # --- READ CURRENT VERSION --------------------------------------------------
 
-CURRENT_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+([a-zA-Z0-9\.-]*)?' "$VERSION_FILE")
+CURRENT_VERSION=$(grep -oE 'version = "[^"]+"' "$VERSION_FILE" | cut -d'"' -f2)
 IFS='.' read -r MAJOR MINOR PATCH <<< "$(echo "$CURRENT_VERSION" | cut -d'-' -f1)"
 
 PRERELEASE=$(echo "$CURRENT_VERSION" | grep -oE '(alpha|beta|rc)[0-9]*' || true)
@@ -66,16 +64,12 @@ case "$BUMP_TYPE" in
     ;;
 esac
 
-# Construct new version
 NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-if [[ -n "$PRERELEASE" ]]; then
-  NEW_VERSION="$NEW_VERSION-$PRERELEASE"
-fi
+[[ -n "$PRERELEASE" ]] && NEW_VERSION="$NEW_VERSION-$PRERELEASE"
 
-# --- UPDATE version.py -----------------------------------------------------
+# --- UPDATE pyproject.toml -------------------------------------------------
 
-sed -i.bak "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" "$VERSION_FILE"
-rm "$VERSION_FILE.bak"
+sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" "$VERSION_FILE"
 
 echo "Updated version: $CURRENT_VERSION → $NEW_VERSION"
 
@@ -85,11 +79,7 @@ echo "Generating changelog..."
 
 LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
-if [[ -n "$LAST_TAG" ]]; then
-  LOG_RANGE="$LAST_TAG..HEAD"
-else
-  LOG_RANGE="HEAD"
-fi
+LOG_RANGE="${LAST_TAG:+$LAST_TAG..HEAD}"
 
 NEW_CHANGELOG="## v$NEW_VERSION - $(date +%Y-%m-%d)
 
@@ -97,7 +87,6 @@ $(git log --pretty=format:'- %s' $LOG_RANGE)
 
 "
 
-# Prepend to CHANGELOG.md
 if [[ -f "$CHANGELOG_FILE" ]]; then
   echo -e "$NEW_CHANGELOG\n$(cat $CHANGELOG_FILE)" > $CHANGELOG_FILE
 else
@@ -111,6 +100,6 @@ git commit -m "chore: release v$NEW_VERSION"
 git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
 
 git push
-git push --tags
+git.push --tags
 
 echo "Release v$NEW_VERSION created and pushed."
