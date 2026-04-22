@@ -1,3 +1,8 @@
+## v0.1.3 - 2026-04-23
+
+- fix: resolve mypy errors across adapters and utils, add proper type annotations, unify TypedDicts, and improve optional spaCy/stanza handling
+
+
 ## v0.1.2 - 2026-04-23
 
 - fix: resolve Ruff warnings and clean up stanza/spacy availability checks
