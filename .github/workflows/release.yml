@@ -1,0 +1,59 @@
+# .github/workflows/release.yml
+name: Release to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release 0.1.0'
+        required: true
+
+jobs:
+  build-and-publish:
+    name: Build and publish to PyPI
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for trusted publishing
+      contents: write  # Required for creating GitHub Release artifacts
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    
+    - name: Install build tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build package
+      run: |
+        python -m build
+        twine check dist/*
+    
+    - name: Upload to PyPI (Trusted Publishing)
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        attestations: true
+    
+    - name: Upload to TestPyPI (for verification)
+      run: |
+        twine upload --repository testpypi dist/* \
+          --username __token__ \
+          --password ${{ secrets.TEST_PYPI_TOKEN }} \
+          --skip-existing
+      continue-on-error: true
+    
+    - name: Create GitHub Release artifact
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
