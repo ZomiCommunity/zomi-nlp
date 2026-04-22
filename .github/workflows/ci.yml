@@ -66,5 +66,5 @@ jobs:
     - uses: actions/checkout@v4
     - name: Check README formatting
       run: |
-        pip install readme-renderer
+        pip install readme-renderer[md]
         python -m readme_renderer README.md --check
