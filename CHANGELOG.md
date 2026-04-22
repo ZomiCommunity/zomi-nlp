@@ -1,3 +1,8 @@
+## v0.1.6 - 2026-04-23
+
+- ci: replace deprecated readme-renderer check with twine check
+
+
 ## v0.1.5 - 2026-04-23
 
 - style: apply mypy fixes
