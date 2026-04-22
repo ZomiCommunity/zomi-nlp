@@ -1,3 +1,9 @@
+## v0.1.2 - 2026-04-23
+
+- fix: resolve Ruff warnings and clean up stanza/spacy availability checks
+- style: apply ruff unsafe fixes
+
+
 # Changelog
 
 ## v0.1.1 - 2026-04-22
@@ -8,5 +14,3 @@
 - fix: Update github action workflow
 - fix: Resolve pydocstyle conflicts in pyproject.toml
 - fix: running linting fix
-
-
