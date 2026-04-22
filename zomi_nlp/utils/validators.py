@@ -1,16 +1,16 @@
-"""Validation utilities for Zomi NLP"""
+"""Validation utilities for Zomi NLP."""
 
 import re
 
 
 def validate_zomi_text(text: str) -> bool:
     """Validate if text contains valid Zomi characters.
-    
+
     Zomi uses Roman alphabet with possible diacritics.
-    
+
     Args:
         text: Text to validate
-    
+
     Returns:
         True if text contains only valid Zomi characters
     """
@@ -21,11 +21,11 @@ def validate_zomi_text(text: str) -> bool:
 
 def normalize_zomi_text(text: str, lowercase: bool = True) -> str:
     """Normalize Zomi text for processing.
-    
+
     Args:
         text: Input text
         lowercase: Convert to lowercase
-    
+
     Returns:
         Normalized text
     """
@@ -44,10 +44,10 @@ def normalize_zomi_text(text: str, lowercase: bool = True) -> str:
 
 def detect_zomi_dialect(text: str) -> str:
     """1Detect which Zomi dialect the text uses.
-    
+
     Args:
         text: Zomi text
-    
+
     Returns:
         Dialect name: "tedim", "falam", "zo", or "unknown"
     """

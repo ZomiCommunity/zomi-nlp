@@ -1,10 +1,10 @@
-"""Pure Zomi token implementation - no external dependencies"""
+"""Pure Zomi token implementation - no external dependencies."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class ZomiToken:
-    """Token representation - independent of any external library"""
+    """Token representation - independent of any external library."""
 
     def __init__(
         self,
@@ -28,14 +28,14 @@ class ZomiToken:
         self.head: int = -1
         self.ent_type_: Optional[str] = None
         self.ent_iob_: Optional[str] = None
-        self.morph: Dict[str, str] = {}
+        self.morph: dict[str, str] = {}
 
         # Zomi-specific
         self.is_clitic: bool = False
         self.clitic_type: Optional[str] = None  # "ve", "ta", "hiam", etc.
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to JSON-serializable dict"""
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to JSON-serializable dict."""
         return {
             "text": self.text,
             "start": self.start_char,

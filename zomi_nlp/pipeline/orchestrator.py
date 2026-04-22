@@ -1,8 +1,8 @@
-"""Main orchestrator for Zomi NLP pipeline with smart fallback"""
+"""Main orchestrator for Zomi NLP pipeline with smart fallback."""
 
 import logging
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from zomi_nlp.config import ZomiConfig
 from zomi_nlp.core.doc import ZomiDoc
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ZomiPipeline:
-    """Main pipeline orchestrator for Zomi NLP"""
+    """Main pipeline orchestrator for Zomi NLP."""
 
     def __init__(self, config: Optional[ZomiConfig] = None):
         self.config = config or ZomiConfig()
@@ -25,8 +25,8 @@ class ZomiPipeline:
         self.ner: Optional[NERBackend] = None
 
         # Track what's actually running
-        self.active_backends: Dict[str, str] = {}
-        self.backend_warnings: List[str] = []
+        self.active_backends: dict[str, str] = {}
+        self.backend_warnings: list[str] = []
 
         self._initialize_backends()
         self._log_warnings()
@@ -36,7 +36,7 @@ class ZomiPipeline:
             logging.basicConfig(level=getattr(logging, self.config.log_level))
 
     def _initialize_backends(self):
-        """Initialize backends with smart fallback"""
+        """Initialize backends with smart fallback."""
         # Tokenizer
         self.tokenizer = self._select_backend_with_fallback(
             task="tokenizer",
@@ -85,10 +85,10 @@ class ZomiPipeline:
         self,
         task: str,
         requested: str,
-        backend_classes: Dict[str, tuple],
-        fallback_order: List[str]
+        backend_classes: dict[str, tuple],
+        fallback_order: list[str]
     ):
-        """Select backend with intelligent fallback"""
+        """Select backend with intelligent fallback."""
         # Case 1: User wants a specific backend
         if requested != "auto" and requested != "hybrid":
             backend = self._try_load_backend(task, requested, backend_classes)
@@ -104,7 +104,7 @@ class ZomiPipeline:
                     f"Falling back to auto-selection."
                 )
                 self.backend_warnings.append(warning_msg)
-                warnings.warn(warning_msg, UserWarning)
+                warnings.warn(warning_msg, UserWarning, stacklevel=2)
                 requested = "auto"  # Fall through to auto
 
         # Case 2: Auto-select (try fallback order)
@@ -122,7 +122,7 @@ class ZomiPipeline:
                                 f"Install '{fallback_order[0]}' for better performance."
                             )
                             self.backend_warnings.append(warning_msg)
-                            warnings.warn(warning_msg, UserWarning)
+                            warnings.warn(warning_msg, UserWarning, stacklevel=2)
                         return backend
 
         # Case 3: No backend available
@@ -132,12 +132,12 @@ class ZomiPipeline:
             f"Using simple fallback tokenizer."
         )
         self.backend_warnings.append(warning_msg)
-        warnings.warn(warning_msg, UserWarning)
+        warnings.warn(warning_msg, UserWarning, stacklevel=2)
         self.active_backends[task] = "none"
         return None
 
-    def _try_load_backend(self, task: str, backend_name: str, backend_classes: Dict[str, tuple]):
-        """Try to load a backend, return None if fails"""
+    def _try_load_backend(self, task: str, backend_name: str, backend_classes: dict[str, tuple]):
+        """Try to load a backend, return None if fails."""
         try:
             module_path, class_name = backend_classes[backend_name]
 
@@ -160,12 +160,12 @@ class ZomiPipeline:
             return None
 
     def _log_warnings(self):
-        """Log collected warnings"""
+        """Log collected warnings."""
         for warning in self.backend_warnings:
             logger.warning(warning)
 
     def __call__(self, text: str) -> ZomiDoc:
-        """Process text through the pipeline"""
+        """Process text through the pipeline."""
         doc = ZomiDoc(text)
 
         # Tokenization (required)
@@ -215,8 +215,8 @@ class ZomiPipeline:
 
         return doc
 
-    def _simple_tokenize(self, text: str) -> List:
-        """Simple fallback tokenization that always works"""
+    def _simple_tokenize(self, text: str) -> list:
+        """Simple fallback tokenization that always works."""
         from zomi_nlp.core.token import ZomiToken
         tokens = []
         pos = 0
@@ -238,12 +238,12 @@ class ZomiPipeline:
 
         return tokens
 
-    def batch_process(self, texts: List[str]) -> List[ZomiDoc]:
-        """Process multiple texts in batch"""
+    def batch_process(self, texts: list[str]) -> list[ZomiDoc]:
+        """Process multiple texts in batch."""
         return [self(text) for text in texts]
 
-    def get_status(self) -> Dict[str, Any]:
-        """Get status of all backends"""
+    def get_status(self) -> dict[str, Any]:
+        """Get status of all backends."""
         return {
             "tokenizer": {
                 "active": self.active_backends.get("tokenizer", "none"),

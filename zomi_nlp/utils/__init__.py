@@ -1,4 +1,4 @@
-"""Utility functions for Zomi NLP"""
+"""Utility functions for Zomi NLP."""
 
 from zomi_nlp.utils.helpers import download_model, get_model_info, list_available_models
 from zomi_nlp.utils.installation import (

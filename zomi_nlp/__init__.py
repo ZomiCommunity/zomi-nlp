@@ -1,4 +1,4 @@
-"""Zomi NLP - Natural Language Processing for Zomi Language"""
+"""Zomi NLP - Natural Language Processing for Zomi Language."""
 
 from zomi_nlp.config import ZomiConfig
 from zomi_nlp.pipeline.orchestrator import ZomiPipeline
@@ -24,7 +24,7 @@ __all__ = [
 
 
 def load(model: str = "auto", **kwargs):
-    """Load a Zomi NLP pipeline"""
+    """Load a Zomi NLP pipeline."""
     config = ZomiConfig(model_name=model, **kwargs)
     return ZomiPipeline(config)
 

@@ -1,19 +1,18 @@
-"""Installation helpers for Zomi NLP dependencies"""
+"""Installation helpers for Zomi NLP dependencies."""
 
 import subprocess
 import sys
-from typing import Dict, Tuple
 
 
 def install_spacy_model(model_name: str = "en_core_web_sm") -> bool:
     """Helper to install spaCy model.
-    
+
     Args:
         model_name: Name of spaCy model to install (default: en_core_web_sm)
-    
+
     Returns:
         bool: True if installation successful, False otherwise
-    
+
     Example:
         >>> from zomi_nlp.utils import install_spacy_model
         >>> install_spacy_model("en_core_web_sm")
@@ -38,13 +37,13 @@ def install_spacy_model(model_name: str = "en_core_web_sm") -> bool:
 
 def install_stanza_model(lang: str = "en") -> bool:
     """Helper to install stanza model.
-    
+
     Args:
         lang: Language code (default: en)
-    
+
     Returns:
         bool: True if installation successful, False otherwise
-    
+
     Example:
         >>> from zomi_nlp.utils import install_stanza_model
         >>> install_stanza_model("en")
@@ -63,15 +62,15 @@ def install_stanza_model(lang: str = "en") -> bool:
         return False
 
 
-def check_installation(verbose: bool = True) -> Dict[str, Dict]:
+def check_installation(verbose: bool = True) -> dict[str, dict]:
     """Check what's installed and print recommendations.
-    
+
     Args:
         verbose: If True, print detailed output to console
-    
+
     Returns:
         Dict with installation status for each component
-    
+
     Example:
         >>> from zomi_nlp.utils import check_installation
         >>> status = check_installation()
@@ -96,7 +95,7 @@ def check_installation(verbose: bool = True) -> Dict[str, Dict]:
         import spacy
         status["spacy"]["installed"] = True
         try:
-            nlp = spacy.load("en_core_web_sm")
+            spacy.load("en_core_web_sm")
             status["spacy"]["model_available"] = True
         except OSError:
             status["spacy"]["error"] = "Model 'en_core_web_sm' not found"
@@ -160,12 +159,12 @@ def check_installation(verbose: bool = True) -> Dict[str, Dict]:
     return status
 
 
-def get_installation_status() -> Tuple[bool, str]:
+def get_installation_status() -> tuple[bool, str]:
     """Quick check if Zomi NLP is ready to use.
-    
+
     Returns:
         Tuple of (is_ready, message)
-    
+
     Example:
         >>> from zomi_nlp.utils import get_installation_status
         >>> ready, msg = get_installation_status()
@@ -186,13 +185,13 @@ def get_installation_status() -> Tuple[bool, str]:
 
 def auto_install_recommended(interactive: bool = True) -> bool:
     """Automatically install recommended dependencies.
-    
+
     Args:
         interactive: If True, ask for confirmation before installing
-    
+
     Returns:
         bool: True if installation successful
-    
+
     Example:
         >>> from zomi_nlp.utils import auto_install_recommended
         >>> auto_install_recommended()

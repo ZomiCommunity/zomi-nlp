@@ -1,4 +1,4 @@
-"""Configuration management for Zomi NLP"""
+"""Configuration management for Zomi NLP."""
 
 from dataclasses import dataclass, field
 from typing import Literal
@@ -8,7 +8,7 @@ BackendMode = Literal["auto", "spacy", "stanza", "hybrid", "none"]
 
 @dataclass
 class ZomiConfig:
-    """Configuration for Zomi NLP pipeline"""
+    """Configuration for Zomi NLP pipeline."""
 
     # Model settings
     model_name: str = "auto"

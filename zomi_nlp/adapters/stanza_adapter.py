@@ -1,6 +1,5 @@
-"""Stanza adapter for Zomi NLP"""
+"""Stanza adapter for Zomi NLP."""
 
-from typing import List
 
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
@@ -8,7 +7,7 @@ from zomi_nlp.interfaces import NERBackend, ParserBackend, TaggerBackend, Tokeni
 
 
 class StanzaTokenizer(TokenizerBackend):
-    """Tokenizer using Stanza"""
+    """Tokenizer using Stanza."""
 
     def __init__(self, lang: str = "en"):
         self.lang = lang
@@ -24,7 +23,7 @@ class StanzaTokenizer(TokenizerBackend):
             except ImportError:
                 raise ImportError("stanza not installed. Run: pip install stanza")
 
-    def tokenize(self, text: str) -> List[ZomiToken]:
+    def tokenize(self, text: str) -> list[ZomiToken]:
         self._load()
         stanza_doc = self._nlp(text)
         tokens = []
@@ -67,7 +66,7 @@ class StanzaTokenizer(TokenizerBackend):
 
 
 class StanzaTagger(TaggerBackend):
-    """POS Tagger using Stanza"""
+    """POS Tagger using Stanza."""
 
     def __init__(self, lang: str = "en"):
         self.lang = lang
@@ -112,7 +111,7 @@ class StanzaTagger(TaggerBackend):
 
 
 class StanzaParser(ParserBackend):
-    """Dependency Parser using Stanza"""
+    """Dependency Parser using Stanza."""
 
     def __init__(self, lang: str = "en"):
         self.lang = lang
@@ -155,7 +154,7 @@ class StanzaParser(ParserBackend):
 
 
 class StanzaNER(NERBackend):
-    """NER using Stanza"""
+    """NER using Stanza."""
 
     def __init__(self, lang: str = "en"):
         self.lang = lang
@@ -173,12 +172,11 @@ class StanzaNER(NERBackend):
     def recognize(self, doc: ZomiDoc) -> ZomiDoc:
         self._load()
         stanza_doc = self._nlp(doc.text)
-        idx = 0
 
         for sentence in stanza_doc.sentences:
             for ent in sentence.ents:
                 # Mark tokens in this entity
-                for i in range(ent.start_char, ent.end_char):
+                for _i in range(ent.start_char, ent.end_char):
                     # Simplified - would need proper alignment
                     pass
 

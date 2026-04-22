@@ -1,6 +1,6 @@
-"""spaCy adapter for Zomi NLP with improved error handling"""
+"""spaCy adapter for Zomi NLP with improved error handling."""
 
-from typing import List, Optional
+from typing import Optional
 
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
@@ -8,7 +8,7 @@ from zomi_nlp.interfaces import NERBackend, ParserBackend, TaggerBackend, Tokeni
 
 
 class SpacyTokenizer(TokenizerBackend):
-    """Tokenizer using spaCy - graceful failure if not installed"""
+    """Tokenizer using spaCy - graceful failure if not installed."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
         self.model_name = model_name
@@ -18,7 +18,7 @@ class SpacyTokenizer(TokenizerBackend):
         self._error_message = None
 
     def _check_availability(self):
-        """Check if spaCy is available and return status"""
+        """Check if spaCy is available and return status."""
         if self._available is not None:
             return self._available
 
@@ -46,12 +46,12 @@ class SpacyTokenizer(TokenizerBackend):
         return self._available
 
     def _load(self):
-        """Lazy load spaCy model with proper error handling"""
+        """Lazy load spaCy model with proper error handling."""
         if self._nlp is None and self._check_availability():
             import spacy
             self._nlp = spacy.load(self.model_name)
 
-    def tokenize(self, text: str) -> List[ZomiToken]:
+    def tokenize(self, text: str) -> list[ZomiToken]:
         if not self._check_availability():
             # Return empty list - caller should handle fallback
             return []
@@ -84,7 +84,7 @@ class SpacyTokenizer(TokenizerBackend):
         return tokens
 
     def _map_pos(self, spacy_pos: str) -> str:
-        """Map spaCy POS tags to Universal Dependencies"""
+        """Map spaCy POS tags to Universal Dependencies."""
         mapping = {
             "NOUN": "NOUN", "VERB": "VERB", "ADJ": "ADJ", "ADV": "ADV",
             "ADP": "ADP", "CONJ": "CONJ", "DET": "DET", "PRON": "PRON",
@@ -100,13 +100,13 @@ class SpacyTokenizer(TokenizerBackend):
         return self._check_availability()
 
     def get_error_message(self) -> Optional[str]:
-        """Get error message if backend unavailable"""
+        """Get error message if backend unavailable."""
         self._check_availability()
         return self._error_message
 
 
 class SpacyTagger(TaggerBackend):
-    """POS Tagger using spaCy - graceful failure"""
+    """POS Tagger using spaCy - graceful failure."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
         self.model_name = model_name
@@ -173,7 +173,7 @@ class SpacyTagger(TaggerBackend):
 
 
 class SpacyParser(ParserBackend):
-    """Dependency Parser using spaCy - graceful failure"""
+    """Dependency Parser using spaCy - graceful failure."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
         self.model_name = model_name
@@ -230,7 +230,7 @@ class SpacyParser(ParserBackend):
 
 
 class SpacyNER(NERBackend):
-    """NER using spaCy - graceful failure"""
+    """NER using spaCy - graceful failure."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
         self.model_name = model_name
@@ -269,10 +269,9 @@ class SpacyNER(NERBackend):
         spacy_doc = self._nlp(doc.text)
 
         for idx, token in enumerate(spacy_doc):
-            if idx < len(doc.tokens):
-                if token.ent_type_:
-                    doc.tokens[idx].ent_type_ = token.ent_type_
-                    doc.tokens[idx].ent_iob_ = token.ent_iob_
+            if idx < len(doc.tokens) and token.ent_type_:
+                doc.tokens[idx].ent_type_ = token.ent_type_
+                doc.tokens[idx].ent_iob_ = token.ent_iob_
 
         return doc
 

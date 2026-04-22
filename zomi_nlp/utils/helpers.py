@@ -1,20 +1,21 @@
-"""Helper utilities for Zomi NLP"""
+"""Helper utilities for Zomi NLP."""
 
+import contextlib
 import subprocess
 import sys
-from typing import List, Optional
+from typing import Optional
 
 
 def download_model(model_name: str, backend: str = "auto") -> bool:
     """Download a model for a specific backend.
-    
+
     Args:
         model_name: Name of the model to download
         backend: "spacy", "stanza", or "auto"
-    
+
     Returns:
         bool: True if successful
-    
+
     Example:
         >>> from zomi_nlp.utils import download_model
         >>> download_model("en_core_web_sm", backend="spacy")
@@ -70,10 +71,10 @@ def _download_stanza_model(lang: str) -> bool:
 
 def get_model_info(model_name: str) -> Optional[dict]:
     """Get information about a model.
-    
+
     Args:
         model_name: Name of the model
-    
+
     Returns:
         Dictionary with model info or None if not found
     """
@@ -97,12 +98,12 @@ def get_model_info(model_name: str) -> Optional[dict]:
     return None
 
 
-def list_available_models() -> List[str]:
+def list_available_models() -> list[str]:
     """List all available models for Zomi NLP.
-    
+
     Returns:
         List of model names
-    
+
     Example:
         >>> from zomi_nlp.utils import list_available_models
         >>> models = list_available_models()
@@ -120,8 +121,6 @@ def list_available_models() -> List[str]:
         pass
 
     # Check stanza models
-    try:
+    with contextlib.suppress(BaseException):
         models.append("stanza_en")
-    except:
-        pass
     return models
