@@ -1,5 +1,8 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = [
+    "setuptools>=61.0",
+    "wheel",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,14 +10,20 @@ name = "zomi-nlp"
 version = "0.1.6-alpha4"
 description = "Natural Language Processing for Zomi Language (Zopau)"
 readme = "README.md"
-license = {text = "Apache-2.0"}
 authors = [
-    {name = "Zomi NLP Community", email = "community@zomi-nlp.org"}
+    { name = "Zomi NLP Community", email = "community@zomi-nlp.org" },
 ]
 maintainers = [
-    {name = "Zomi NLP Team", email = "team@zomi-nlp.org"}
+    { name = "Zomi NLP Team", email = "team@zomi-nlp.org" },
 ]
-keywords = ["nlp", "zomi", "zopau", "tokenizer", "pos-tagging", "parser"]
+keywords = [
+    "nlp",
+    "zomi",
+    "zopau",
+    "tokenizer",
+    "pos-tagging",
+    "parser",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -29,10 +38,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 requires-python = ">=3.9"
-
 dependencies = [
     "requests>=2.28.0",
 ]
+
+[project.license]
+text = "Apache-2.0"
 
 [project.optional-dependencies]
 spacy = [
@@ -57,39 +68,65 @@ dev = [
     "pre-commit>=3.0.0",
     "build>=0.10.0",
     "twine>=4.0.0",
+    "tomli-w",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/zomi-community/zomi-nlp"
-"Documentation" = "https://zomi-nlp.readthedocs.io"
-"Repository" = "https://github.com/zomi-community/zomi-nlp.git"
-"Issues" = "https://github.com/zomi-community/zomi-nlp/issues"
-"Changelog" = "https://github.com/zomi-community/zomi-nlp/releases"
+Homepage = "https://github.com/ZomiCommunity/zomi-nlp"
+Documentation = "https://zomi-nlp.readthedocs.io"
+Repository = "https://github.com/ZomiCommunity/zomi-nlp.git"
+Issues = "https://github.com/ZomiCommunity/zomi-nlp/issues"
+Changelog = "https://github.com/ZomiCommunity/zomi-nlp/releases"
 
 [project.scripts]
 zomi-nlp = "zomi_nlp.cli:main"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["zomi_nlp*"]
-exclude = ["tests*", "scripts*"]
+where = [
+    ".",
+]
+include = [
+    "zomi_nlp*",
+]
+exclude = [
+    "tests*",
+    "scripts*",
+]
 
 [tool.setuptools.package-data]
-zomi_nlp = ["py.typed", "version.py"]
+zomi_nlp = [
+    "py.typed",
+    "version.py",
+]
 
 [tool.ruff]
 line-length = 100
 target-version = "py39"
+extend-include = ["*.md"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "N", "D", "UP", "B", "C4", "SIM"]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "N",
+    "D",
+    "UP",
+    "B",
+    "C4",
+    "SIM",
+]
 ignore = [
-    # Ignore missing docstrings for modules/classes/functions
-    "D100", "D101", "D102", "D103", "D104", "D105", "D107",
-
-    # Resolve pydocstyle conflicts
-    "D203",  # conflicts with D211
-    "D213",  # conflicts with D212
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D107",
+    "D203",
+    "D213",
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -103,13 +140,20 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests"]
+testpaths = [
+    "tests",
+]
 addopts = "-v --tb=short --strict-markers"
 timeout = 300
 
 [tool.coverage.run]
-source = ["zomi_nlp"]
-omit = ["tests/*", "scripts/*"]
+source = [
+    "zomi_nlp",
+]
+omit = [
+    "tests/*",
+    "scripts/*",
+]
 
 [tool.coverage.report]
 exclude_lines = [
