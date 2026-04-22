@@ -100,6 +100,6 @@ git commit -m "chore: release v$NEW_VERSION"
 git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
 
 git push
-git.push --tags
+git push --tags
 
 echo "Release v$NEW_VERSION created and pushed."

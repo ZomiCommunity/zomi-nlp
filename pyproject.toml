@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zomi-nlp"
-version = "0.1.0-alpha1"
+version = "0.1.6-alpha1"
 description = "Natural Language Processing for Zomi Language (Zopau)"
 readme = "README.md"
 license = {text = "Apache-2.0"}
