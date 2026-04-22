@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zomi-nlp"
+version = "0.1.0"
+description = "Natural Language Processing for Zomi Language (Zopau)"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Zomi NLP Community", email = "community@zomi-nlp.org"}
+]
+maintainers = [
+    {name = "Zomi NLP Team", email = "team@zomi-nlp.org"}
+]
+keywords = ["nlp", "zomi", "zopau", "tokenizer", "pos-tagging", "parser"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.9"
+
+dependencies = [
+    "requests>=2.28.0",
+]
+
+[project.optional-dependencies]
+spacy = [
+    "spacy>=3.5.0,<4.0.0",
+]
+stanza = [
+    "stanza>=1.5.0,<2.0.0",
+]
+full = [
+    "zomi-nlp[spacy,stanza]",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-timeout>=2.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "black>=23.0.0",
+]
+dev = [
+    "zomi-nlp[full,test]",
+    "pre-commit>=3.0.0",
+    "build>=0.10.0",
+    "twine>=4.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/zomi-community/zomi-nlp"
+"Documentation" = "https://zomi-nlp.readthedocs.io"
+"Repository" = "https://github.com/zomi-community/zomi-nlp.git"
+"Issues" = "https://github.com/zomi-community/zomi-nlp/issues"
+"Changelog" = "https://github.com/zomi-community/zomi-nlp/releases"
+
+[project.scripts]
+zomi-nlp = "zomi_nlp.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["zomi_nlp*"]
+exclude = ["tests*", "scripts*"]
+
+[tool.setuptools.package-data]
+zomi_nlp = ["py.typed", "version.py"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "D", "UP", "B", "C4", "SIM"]
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = "-v --tb=short --strict-markers"
+timeout = 300
+
+[tool.coverage.run]
+source = ["zomi_nlp"]
+omit = ["tests/*", "scripts/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
