@@ -1,3 +1,8 @@
+## v0.1.6-alpha3 - 2026-04-23
+
+- fix: correct release workflow for TestPyPI uploads
+
+
 ## v0.1.6-alpha2 - 2026-04-23
 
 - fix: sync pyproject version with latest release
