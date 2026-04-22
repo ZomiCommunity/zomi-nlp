@@ -1,3 +1,8 @@
+## v0.1.5 - 2026-04-23
+
+- style: apply mypy fixes
+
+
 ## v0.1.4 - 2026-04-23
 
 - style: apply ruff safe fixes
