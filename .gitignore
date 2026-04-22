@@ -1,0 +1,468 @@
+# ============================================
+# Zomi NLP - Python Project .gitignore
+# ============================================
+
+# ------------------- Python -------------------
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.pye
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-wheel-metadata/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+test-reports/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+*.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# profiling data
+.prof
+*.prof
+
+# ------------------- IDEs -------------------
+# VSCode
+.vscode/
+*.code-workspace
+.history/
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Vim
+*.swp
+*.swo
+*~
+.~*
+.*.swp
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ------------------- Testing -------------------
+# Coverage reports
+.coverage
+.coverage.*
+.coverage.lcov
+htmlcov/
+.coverage.xml
+*.cover
+coverage.xml
+*.gcda
+*.gcno
+*.gcov
+
+# pytest
+.pytest_cache/
+.pytest/
+test_results/
+
+# Hypothesis
+.hypothesis/
+
+# Tox
+.tox/
+.tox_ci/
+
+# Benchmark
+.benchmarks/
+benchmark_results/
+
+# ------------------- Logs & Databases -------------------
+# Logs
+*.log
+logs/
+log/
+*.pid
+*.seed
+*.pid.lock
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# ------------------- Models & Data -------------------
+# Large data files (use DVC or Git LFS for these)
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.hdf
+*.pb
+*.ckpt
+*.pth
+*.pt
+*.bin
+*.model
+*.onnx
+*.tflite
+*.params
+
+# Model directories
+models/*/
+!models/README.md
+!models/.gitkeep
+
+# Data directories
+data/
+datasets/
+!data/README.md
+!data/.gitkeep
+
+# Cache directories
+.cache/
+cache/
+*.cache
+
+# SentencePiece models
+*.model
+*.vocab
+
+# Word2Vec / FastText
+*.vec
+*.bin
+*.bin.zip
+
+# ------------------- Hugging Face -------------------
+.huggingface/
+hf_models/
+transformers_cache/
+
+# ------------------- spaCy -------------------
+spacy_models/
+*.spacy
+
+# ------------------- Stanza -------------------
+stanza_resources/
+
+# ------------------- MLflow -------------------
+mlruns/
+mlartifacts/
+
+# ------------------- Docker -------------------
+.dockerignore
+*.pid
+*.pid.lock
+docker-compose.override.yml
+docker-compose.*.yml
+
+# ------------------- Deployment -------------------
+# Serverless
+.serverless/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.tfvars
+
+# Kubernetes
+*.kubeconfig
+helm/values.local.yaml
+
+# ------------------- Documentation -------------------
+docs/_build/
+docs/api/
+site/
+*.pdf
+*.epub
+*.mobi
+
+# ------------------- Secrets & Credentials -------------------
+# Secrets
+*.key
+*.pem
+*.crt
+*.csr
+*.secret
+*.secrets
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+
+# Credentials
+credentials.json
+service-account.json
+*.p12
+*.pfx
+.secrets/
+secrets/
+
+# API keys
+*.key
+*.api-key
+apikey.txt
+api_key.txt
+
+# ------------------- OS & Editor -------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.dll
+*.exe
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ------------------- Build Tools -------------------
+# Setuptools
+*.egg-info/
+*.egg
+
+# Build
+build/
+dist/
+wheelhouse/
+
+# ------------------- Development -------------------
+# Pre-commit
+.pre-commit-config.local.yaml
+
+# Local development scripts
+local/
+*.local.py
+*.local.yaml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# ------------------- Zomi NLP Specific -------------------
+# Zomi-specific data
+zomi_data/
+zomi_corpus/
+annotations/
+!annotations/README.md
+
+# Training outputs
+training_outputs/
+experiments/
+runs/
+wandb/
+tensorboard/
+
+# Evaluation outputs
+evaluation/
+benchmarks/
+
+# Local config
+config.local.yaml
+config.local.json
+.zomi_config
+
+# ------------------- Cloud & CI/CD -------------------
+# GitHub Actions
+.github/secrets/
+!.github/workflows/
+
+# CircleCI
+.circleci/secrets/
+
+# Travis CI
+.travis/secrets/
+
+# GitLab CI
+.gitlab/secrets/
+
+# AWS
+.aws/
+aws_config/
+
+# GCP
+.gcloud/
+google_application_credentials.json
+
+# ------------------- Misc -------------------
+# Please keep only the files you need
+*.orig
+*.rej
+*.swp
+*~
+*.sublime-*
+.DS_Store
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.tmp
+*.bak
+
+# Lock files (keep if using deterministic builds)
+# package-lock.json
+# yarn.lock
+# Cargo.lock
+# Gemfile.lock
+
+# ------------------- Keep These -------------------
+# These directories are small and should be versioned
+!models/.gitkeep
+!data/.gitkeep
+!annotations/.gitkeep
+!docs/.gitkeep
+!tests/fixtures/.gitkeep
+
+# Example files (small)
+!tests/fixtures/*.txt
+!examples/*.py
+
+# License and docs
+!LICENSE
+!README.md
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!CHANGELOG.md
+!SECURITY.md
+!MAINTENANCE.md
+
+# Sample configs
+!configs/*.yaml.example
+!configs/*.json.example
+!.env.example
