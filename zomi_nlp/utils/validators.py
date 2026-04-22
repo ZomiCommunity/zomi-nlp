@@ -65,6 +65,6 @@ def detect_zomi_dialect(text: str) -> str:
     zo_count = sum(1 for m in zo_markers if m in text_lower)
 
     scores = {"tedim": tedim_count, "falam": falam_count, "zo": zo_count}
-    best = max(scores, key=scores.get)
+    best = max(scores, key=lambda k: scores[k])
 
     return best if scores[best] > 0 else "unknown"

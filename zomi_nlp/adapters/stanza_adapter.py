@@ -1,7 +1,7 @@
 """Stanza adapter for Zomi NLP."""
 
 
-import importlib
+import importlib.util
 
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
@@ -27,6 +27,7 @@ class StanzaTokenizer(TokenizerBackend):
 
     def tokenize(self, text: str) -> list[ZomiToken]:
         self._load()
+        assert self._nlp is not None, "Pipeline not initialized"
         stanza_doc = self._nlp(text)
         tokens = []
         idx = 0
@@ -81,6 +82,8 @@ class StanzaTagger(TaggerBackend):
 
     def tag(self, doc: ZomiDoc) -> ZomiDoc:
         self._load()
+        if self._nlp is None:
+            raise RuntimeError("Pipeline not initialized")
         stanza_doc = self._nlp(doc.text)
         idx = 0
 
@@ -123,6 +126,8 @@ class StanzaParser(ParserBackend):
 
     def parse(self, doc: ZomiDoc) -> ZomiDoc:
         self._load()
+        if self._nlp is None:
+            raise RuntimeError("Pipeline not initialized")
         stanza_doc = self._nlp(doc.text)
         idx = 0
 
@@ -161,6 +166,7 @@ class StanzaNER(NERBackend):
 
     def recognize(self, doc: ZomiDoc) -> ZomiDoc:
         self._load()
+        assert self._nlp is not None, "Pipeline not initialized"
         stanza_doc = self._nlp(doc.text)
 
         for sentence in stanza_doc.sentences:

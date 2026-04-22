@@ -1,8 +1,15 @@
 """Installation helpers for Zomi NLP dependencies."""
-
 import subprocess
 import sys
+from typing import Optional, TypedDict, Union
 
+
+class InstallStatus(TypedDict, total=False):
+    installed: bool
+    model_available: bool
+    error: Optional[str]
+    version: Optional[str]
+    ready: bool
 
 def install_spacy_model(model_name: str = "en_core_web_sm") -> bool:
     """Helper to install spaCy model.
@@ -62,7 +69,7 @@ def install_stanza_model(lang: str = "en") -> bool:
         return False
 
 
-def check_installation(verbose: bool = True) -> dict[str, dict]:
+def check_installation(verbose: bool = True) -> dict[str, InstallStatus]:
     """Check what's installed and print recommendations.
 
     Args:
@@ -77,10 +84,10 @@ def check_installation(verbose: bool = True) -> dict[str, dict]:
         >>> if status["spacy"]["installed"]:
         ...     print("spaCy is ready!")
     """
-    status = {
+    status: dict[str, InstallStatus] = {
         "spacy": {"installed": False, "model_available": False, "error": None},
         "stanza": {"installed": False, "model_available": False, "error": None},
-        "zomi_nlp": {"version": None, "ready": False}
+        "zomi_nlp": {"version": None, "ready": False},
     }
 
     # Check zomi_nlp version

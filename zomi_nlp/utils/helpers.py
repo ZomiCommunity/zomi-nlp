@@ -78,7 +78,7 @@ def get_model_info(model_name: str) -> Optional[dict]:
                 "backend": "spacy",
                 "name": model_name,
                 "lang": nlp.lang,
-                "pipeline": nlp.pipeline_names,
+                "pipeline": nlp.pipeline_names, # type: ignore[attr-defined]
                 "vectors": nlp.vocab.vectors_length if nlp.vocab.vectors_length else None
             }
         except OSError as e:

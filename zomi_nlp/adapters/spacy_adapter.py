@@ -1,6 +1,10 @@
 """spaCy adapter for Zomi NLP with improved error handling."""
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import spacy
+    from spacy.language import Language
 
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
@@ -11,13 +15,13 @@ class SpacyTokenizer(TokenizerBackend):
     """Tokenizer using spaCy - graceful failure if not installed."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
-        self.model_name = model_name
-        self._nlp = None
-        self._name = f"spacy_{model_name}"
-        self._available = None
-        self._error_message = None
+        self.model_name: str = model_name
+        self._nlp: Optional[Language] = None
+        self._name: str = f"spacy_{model_name}"
+        self._available: Optional[bool] = None
+        self._error_message: Optional[str] = None
 
-    def _check_availability(self):
+    def _check_availability(self) -> bool:
         """Check if spaCy is available and return status."""
         if self._available is not None:
             return self._available
@@ -57,6 +61,8 @@ class SpacyTokenizer(TokenizerBackend):
             return []
 
         self._load()
+        if self._nlp is None:
+            raise RuntimeError("Pipeline not initialized")
         spacy_doc = self._nlp(text)
         tokens = []
 
@@ -109,12 +115,12 @@ class SpacyTagger(TaggerBackend):
     """POS Tagger using spaCy - graceful failure."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
-        self.model_name = model_name
-        self._nlp = None
-        self._available = None
-        self._error_message = None
+        self.model_name: str = model_name
+        self._nlp: Optional[Language] = None
+        self._available: Optional[bool] = None
+        self._error_message: Optional[str] = None
 
-    def _check_availability(self):
+    def _check_availability(self) -> bool:
         if self._available is not None:
             return self._available
 
@@ -143,6 +149,7 @@ class SpacyTagger(TaggerBackend):
             return doc
 
         self._load()
+        assert self._nlp is not None, "Pipeline not initialized"
         spacy_doc = self._nlp(doc.text)
 
         for idx, token in enumerate(spacy_doc):
@@ -177,12 +184,12 @@ class SpacyParser(ParserBackend):
     """Dependency Parser using spaCy - graceful failure."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
-        self.model_name = model_name
-        self._nlp = None
-        self._available = None
-        self._error_message = None
+        self.model_name: str = model_name
+        self._nlp: Optional[Language] = None
+        self._available: Optional[bool] = None
+        self._error_message: Optional[str] = None
 
-    def _check_availability(self):
+    def _check_availability(self) -> bool:
         if self._available is not None:
             return self._available
 
@@ -210,6 +217,7 @@ class SpacyParser(ParserBackend):
             return doc
 
         self._load()
+        assert self._nlp is not None, "Pipeline not initialized"
         spacy_doc = self._nlp(doc.text)
 
         for idx, token in enumerate(spacy_doc):
@@ -234,12 +242,12 @@ class SpacyNER(NERBackend):
     """NER using spaCy - graceful failure."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
-        self.model_name = model_name
-        self._nlp = None
-        self._available = None
-        self._error_message = None
+        self.model_name: str = model_name
+        self._nlp: Optional[Language] = None
+        self._available: Optional[bool] = None
+        self._error_message: Optional[str] = None
 
-    def _check_availability(self):
+    def _check_availability(self) -> bool:
         if self._available is not None:
             return self._available
 
@@ -267,6 +275,7 @@ class SpacyNER(NERBackend):
             return doc
 
         self._load()
+        assert self._nlp is not None, "Pipeline not initialized"
         spacy_doc = self._nlp(doc.text)
 
         for idx, token in enumerate(spacy_doc):
