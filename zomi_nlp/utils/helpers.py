@@ -1,14 +1,12 @@
 """Helper utilities for Zomi NLP"""
 
-import sys
 import subprocess
-from typing import Optional, List
-from pathlib import Path
+import sys
+from typing import List, Optional
 
 
 def download_model(model_name: str, backend: str = "auto") -> bool:
-    """
-    Download a model for a specific backend.
+    """Download a model for a specific backend.
     
     Args:
         model_name: Name of the model to download
@@ -71,8 +69,7 @@ def _download_stanza_model(lang: str) -> bool:
 
 
 def get_model_info(model_name: str) -> Optional[dict]:
-    """
-    Get information about a model.
+    """Get information about a model.
     
     Args:
         model_name: Name of the model
@@ -96,13 +93,12 @@ def get_model_info(model_name: str) -> Optional[dict]:
             pass
     except:
         pass
-    
+
     return None
 
 
 def list_available_models() -> List[str]:
-    """
-    List all available models for Zomi NLP.
+    """List all available models for Zomi NLP.
     
     Returns:
         List of model names
@@ -113,23 +109,19 @@ def list_available_models() -> List[str]:
         >>> print(models)
     """
     models = []
-    
+
     # Check spaCy models
     try:
-        import spacy
-        from spacy.cli.info import info
         # This is simplified - real implementation would check installed models
         models.append("en_core_web_sm")
         models.append("en_core_web_md")
         models.append("en_core_web_lg")
     except:
         pass
-    
+
     # Check stanza models
     try:
-        import stanza
         models.append("stanza_en")
     except:
         pass
-    
     return models

@@ -3,12 +3,10 @@
 import subprocess
 import sys
 from typing import Dict, Tuple
-from importlib import import_module
 
 
 def install_spacy_model(model_name: str = "en_core_web_sm") -> bool:
-    """
-    Helper to install spaCy model.
+    """Helper to install spaCy model.
     
     Args:
         model_name: Name of spaCy model to install (default: en_core_web_sm)
@@ -29,7 +27,7 @@ def install_spacy_model(model_name: str = "en_core_web_sm") -> bool:
         )
         print(f"✅ Successfully installed {model_name}")
         return True
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         print(f"❌ Failed to install {model_name}")
         print(f"   Try manual install: python -m spacy download {model_name}")
         return False
@@ -39,8 +37,7 @@ def install_spacy_model(model_name: str = "en_core_web_sm") -> bool:
 
 
 def install_stanza_model(lang: str = "en") -> bool:
-    """
-    Helper to install stanza model.
+    """Helper to install stanza model.
     
     Args:
         lang: Language code (default: en)
@@ -67,8 +64,7 @@ def install_stanza_model(lang: str = "en") -> bool:
 
 
 def check_installation(verbose: bool = True) -> Dict[str, Dict]:
-    """
-    Check what's installed and print recommendations.
+    """Check what's installed and print recommendations.
     
     Args:
         verbose: If True, print detailed output to console
@@ -87,14 +83,14 @@ def check_installation(verbose: bool = True) -> Dict[str, Dict]:
         "stanza": {"installed": False, "model_available": False, "error": None},
         "zomi_nlp": {"version": None, "ready": False}
     }
-    
+
     # Check zomi_nlp version
     try:
         from zomi_nlp.version import __version__
         status["zomi_nlp"]["version"] = __version__
     except ImportError:
         status["zomi_nlp"]["version"] = "unknown"
-    
+
     # Check spaCy
     try:
         import spacy
@@ -108,7 +104,7 @@ def check_installation(verbose: bool = True) -> Dict[str, Dict]:
             status["spacy"]["error"] = str(e)
     except ImportError:
         status["spacy"]["error"] = "spaCy not installed"
-    
+
     # Check Stanza
     try:
         import stanza
@@ -116,13 +112,13 @@ def check_installation(verbose: bool = True) -> Dict[str, Dict]:
         status["stanza"]["model_available"] = True  # Stanza downloads on demand
     except ImportError:
         status["stanza"]["error"] = "stanza not installed"
-    
+
     # Determine overall readiness
     status["zomi_nlp"]["ready"] = (
-        status["spacy"]["model_available"] or 
+        status["spacy"]["model_available"] or
         status["stanza"]["installed"]
     )
-    
+
     # Print verbose output
     if verbose:
         print("\n" + "=" * 50)
@@ -130,7 +126,7 @@ def check_installation(verbose: bool = True) -> Dict[str, Dict]:
         print("=" * 50)
         print(f"📦 Zomi NLP version: {status['zomi_nlp']['version']}")
         print()
-        
+
         # spaCy status
         if status["spacy"]["installed"]:
             if status["spacy"]["model_available"]:
@@ -143,14 +139,14 @@ def check_installation(verbose: bool = True) -> Dict[str, Dict]:
         else:
             print("❌ spaCy: Not installed")
             print("   → Run: pip install spacy")
-        
+
         # Stanza status
         if status["stanza"]["installed"]:
             print("✅ stanza: Installed")
         else:
             print("❌ stanza: Not installed")
             print("   → Run: pip install stanza")
-        
+
         print()
         print("💡 Recommendations:")
         if not status["zomi_nlp"]["ready"]:
@@ -158,15 +154,14 @@ def check_installation(verbose: bool = True) -> Dict[str, Dict]:
             print("     pip install 'zomi-nlp[full]'")
         elif not status["spacy"]["model_available"]:
             print("   • Download spaCy model for better performance")
-        
+
         print("=" * 50 + "\n")
-    
+
     return status
 
 
 def get_installation_status() -> Tuple[bool, str]:
-    """
-    Quick check if Zomi NLP is ready to use.
+    """Quick check if Zomi NLP is ready to use.
     
     Returns:
         Tuple of (is_ready, message)
@@ -178,7 +173,7 @@ def get_installation_status() -> Tuple[bool, str]:
         ...     print(msg)
     """
     status = check_installation(verbose=False)
-    
+
     if status["spacy"]["model_available"]:
         return True, "Ready with spaCy"
     elif status["stanza"]["installed"]:
@@ -190,8 +185,7 @@ def get_installation_status() -> Tuple[bool, str]:
 
 
 def auto_install_recommended(interactive: bool = True) -> bool:
-    """
-    Automatically install recommended dependencies.
+    """Automatically install recommended dependencies.
     
     Args:
         interactive: If True, ask for confirmation before installing
@@ -204,20 +198,20 @@ def auto_install_recommended(interactive: bool = True) -> bool:
         >>> auto_install_recommended()
     """
     status = check_installation(verbose=False)
-    
+
     if status["zomi_nlp"]["ready"]:
         print("✅ Zomi NLP is already ready to use!")
         return True
-    
+
     if interactive:
         print("\n📦 Zomi NLP needs some dependencies to work fully.")
         response = input("Install recommended packages? (y/n): ")
         if response.lower() != 'y':
             print("Skipping installation. Some features may not work.")
             return False
-    
+
     success = True
-    
+
     # Install spaCy if missing
     if not status["spacy"]["installed"]:
         print("\n📦 Installing spaCy...")
@@ -230,11 +224,11 @@ def auto_install_recommended(interactive: bool = True) -> bool:
         except:
             print("❌ Failed to install spaCy")
             success = False
-    
+
     # Install spaCy model
     if status["spacy"]["installed"] and not status["spacy"]["model_available"]:
         success = install_spacy_model() and success
-    
+
     # Install stanza if missing
     if not status["stanza"]["installed"]:
         print("\n📦 Installing stanza...")
@@ -247,10 +241,10 @@ def auto_install_recommended(interactive: bool = True) -> bool:
         except:
             print("❌ Failed to install stanza")
             success = False
-    
+
     if success:
         print("\n✅ Installation complete! Zomi NLP is ready.")
     else:
         print("\n⚠️  Some components failed to install. Run 'check_installation()' for details.")
-    
+
     return success

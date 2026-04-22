@@ -1,26 +1,27 @@
 """spaCy adapter for Zomi NLP with improved error handling"""
 
 from typing import List, Optional
-from zomi_nlp.core.token import ZomiToken
+
 from zomi_nlp.core.doc import ZomiDoc
-from zomi_nlp.interfaces import TokenizerBackend, TaggerBackend, ParserBackend, NERBackend
+from zomi_nlp.core.token import ZomiToken
+from zomi_nlp.interfaces import NERBackend, ParserBackend, TaggerBackend, TokenizerBackend
 
 
 class SpacyTokenizer(TokenizerBackend):
     """Tokenizer using spaCy - graceful failure if not installed"""
-    
+
     def __init__(self, model_name: str = "en_core_web_sm"):
         self.model_name = model_name
         self._nlp = None
         self._name = f"spacy_{model_name}"
         self._available = None
         self._error_message = None
-    
+
     def _check_availability(self):
         """Check if spaCy is available and return status"""
         if self._available is not None:
             return self._available
-        
+
         try:
             import spacy
             # Try to load model
@@ -41,24 +42,24 @@ class SpacyTokenizer(TokenizerBackend):
                 "spaCy not installed. "
                 "Run: pip install spacy"
             )
-        
+
         return self._available
-    
+
     def _load(self):
         """Lazy load spaCy model with proper error handling"""
         if self._nlp is None and self._check_availability():
             import spacy
             self._nlp = spacy.load(self.model_name)
-    
+
     def tokenize(self, text: str) -> List[ZomiToken]:
         if not self._check_availability():
             # Return empty list - caller should handle fallback
             return []
-        
+
         self._load()
         spacy_doc = self._nlp(text)
         tokens = []
-        
+
         for idx, token in enumerate(spacy_doc):
             zomi_token = ZomiToken(
                 text=token.text,
@@ -72,16 +73,16 @@ class SpacyTokenizer(TokenizerBackend):
             zomi_token.lemma_ = token.lemma_
             zomi_token.dep_ = token.dep_
             zomi_token.head = token.head.i if token.head else -1
-            
+
             # Map entity annotations
             if token.ent_type_:
                 zomi_token.ent_type_ = token.ent_type_
                 zomi_token.ent_iob_ = token.ent_iob_
-            
+
             tokens.append(zomi_token)
-        
+
         return tokens
-    
+
     def _map_pos(self, spacy_pos: str) -> str:
         """Map spaCy POS tags to Universal Dependencies"""
         mapping = {
@@ -91,13 +92,13 @@ class SpacyTokenizer(TokenizerBackend):
             "PROPN": "PROPN", "SYM": "SYM", "INTJ": "INTJ", "X": "X"
         }
         return mapping.get(spacy_pos, "X")
-    
+
     def name(self) -> str:
         return self._name
-    
+
     def is_available(self) -> bool:
         return self._check_availability()
-    
+
     def get_error_message(self) -> Optional[str]:
         """Get error message if backend unavailable"""
         self._check_availability()
@@ -106,17 +107,17 @@ class SpacyTokenizer(TokenizerBackend):
 
 class SpacyTagger(TaggerBackend):
     """POS Tagger using spaCy - graceful failure"""
-    
+
     def __init__(self, model_name: str = "en_core_web_sm"):
         self.model_name = model_name
         self._nlp = None
         self._available = None
         self._error_message = None
-    
+
     def _check_availability(self):
         if self._available is not None:
             return self._available
-        
+
         try:
             import spacy
             try:
@@ -128,29 +129,29 @@ class SpacyTagger(TaggerBackend):
         except ImportError:
             self._available = False
             self._error_message = "spaCy not installed. Run: pip install spacy"
-        
+
         return self._available
-    
+
     def _load(self):
         if self._nlp is None and self._check_availability():
             import spacy
             self._nlp = spacy.load(self.model_name)
-    
+
     def tag(self, doc: ZomiDoc) -> ZomiDoc:
         if not self._check_availability() or not doc.tokens:
             return doc
-        
+
         self._load()
         spacy_doc = self._nlp(doc.text)
-        
+
         for idx, token in enumerate(spacy_doc):
             if idx < len(doc.tokens):
                 doc.tokens[idx].pos_ = self._map_pos(token.pos_)
                 doc.tokens[idx].tag_ = token.tag_
                 doc.tokens[idx].lemma_ = token.lemma_
-        
+
         return doc
-    
+
     def _map_pos(self, spacy_pos: str) -> str:
         mapping = {
             "NOUN": "NOUN", "VERB": "VERB", "ADJ": "ADJ", "ADV": "ADV",
@@ -159,13 +160,13 @@ class SpacyTagger(TaggerBackend):
             "PROPN": "PROPN", "SYM": "SYM", "INTJ": "INTJ", "X": "X"
         }
         return mapping.get(spacy_pos, "X")
-    
+
     def name(self) -> str:
         return f"spacy_{self.model_name}"
-    
+
     def is_available(self) -> bool:
         return self._check_availability()
-    
+
     def get_error_message(self) -> Optional[str]:
         self._check_availability()
         return self._error_message
@@ -173,17 +174,17 @@ class SpacyTagger(TaggerBackend):
 
 class SpacyParser(ParserBackend):
     """Dependency Parser using spaCy - graceful failure"""
-    
+
     def __init__(self, model_name: str = "en_core_web_sm"):
         self.model_name = model_name
         self._nlp = None
         self._available = None
         self._error_message = None
-    
+
     def _check_availability(self):
         if self._available is not None:
             return self._available
-        
+
         try:
             import spacy
             try:
@@ -195,34 +196,34 @@ class SpacyParser(ParserBackend):
         except ImportError:
             self._available = False
             self._error_message = "spaCy not installed"
-        
+
         return self._available
-    
+
     def _load(self):
         if self._nlp is None and self._check_availability():
             import spacy
             self._nlp = spacy.load(self.model_name)
-    
+
     def parse(self, doc: ZomiDoc) -> ZomiDoc:
         if not self._check_availability() or not doc.tokens:
             return doc
-        
+
         self._load()
         spacy_doc = self._nlp(doc.text)
-        
+
         for idx, token in enumerate(spacy_doc):
             if idx < len(doc.tokens):
                 doc.tokens[idx].dep_ = token.dep_
                 doc.tokens[idx].head = token.head.i if token.head else -1
-        
+
         return doc
-    
+
     def name(self) -> str:
         return f"spacy_{self.model_name}"
-    
+
     def is_available(self) -> bool:
         return self._check_availability()
-    
+
     def get_error_message(self) -> Optional[str]:
         self._check_availability()
         return self._error_message
@@ -230,17 +231,17 @@ class SpacyParser(ParserBackend):
 
 class SpacyNER(NERBackend):
     """NER using spaCy - graceful failure"""
-    
+
     def __init__(self, model_name: str = "en_core_web_sm"):
         self.model_name = model_name
         self._nlp = None
         self._available = None
         self._error_message = None
-    
+
     def _check_availability(self):
         if self._available is not None:
             return self._available
-        
+
         try:
             import spacy
             try:
@@ -252,35 +253,35 @@ class SpacyNER(NERBackend):
         except ImportError:
             self._available = False
             self._error_message = "spaCy not installed"
-        
+
         return self._available
-    
+
     def _load(self):
         if self._nlp is None and self._check_availability():
             import spacy
             self._nlp = spacy.load(self.model_name)
-    
+
     def recognize(self, doc: ZomiDoc) -> ZomiDoc:
         if not self._check_availability() or not doc.tokens:
             return doc
-        
+
         self._load()
         spacy_doc = self._nlp(doc.text)
-        
+
         for idx, token in enumerate(spacy_doc):
             if idx < len(doc.tokens):
                 if token.ent_type_:
                     doc.tokens[idx].ent_type_ = token.ent_type_
                     doc.tokens[idx].ent_iob_ = token.ent_iob_
-        
+
         return doc
-    
+
     def name(self) -> str:
         return f"spacy_{self.model_name}"
-    
+
     def is_available(self) -> bool:
         return self._check_availability()
-    
+
     def get_error_message(self) -> Optional[str]:
         self._check_availability()
         return self._error_message

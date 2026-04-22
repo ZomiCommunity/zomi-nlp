@@ -2,41 +2,41 @@
 
 import logging
 import warnings
-from typing import Optional, List, Dict, Any
-from zomi_nlp.config import ZomiConfig, BackendMode
+from typing import Any, Dict, List, Optional
+
+from zomi_nlp.config import ZomiConfig
 from zomi_nlp.core.doc import ZomiDoc
-from zomi_nlp.interfaces import TokenizerBackend, TaggerBackend, ParserBackend, NERBackend
+from zomi_nlp.interfaces import NERBackend, ParserBackend, TaggerBackend, TokenizerBackend
 
 logger = logging.getLogger(__name__)
 
 
 class ZomiPipeline:
     """Main pipeline orchestrator for Zomi NLP"""
-    
+
     def __init__(self, config: Optional[ZomiConfig] = None):
         self.config = config or ZomiConfig()
         self._setup_logging()
-        
+
         # Backends
         self.tokenizer: Optional[TokenizerBackend] = None
         self.tagger: Optional[TaggerBackend] = None
         self.parser: Optional[ParserBackend] = None
         self.ner: Optional[NERBackend] = None
-        
+
         # Track what's actually running
         self.active_backends: Dict[str, str] = {}
         self.backend_warnings: List[str] = []
-        
+
         self._initialize_backends()
         self._log_warnings()
-    
+
     def _setup_logging(self):
         if self.config.verbose:
             logging.basicConfig(level=getattr(logging, self.config.log_level))
-    
+
     def _initialize_backends(self):
         """Initialize backends with smart fallback"""
-        
         # Tokenizer
         self.tokenizer = self._select_backend_with_fallback(
             task="tokenizer",
@@ -47,7 +47,7 @@ class ZomiPipeline:
             },
             fallback_order=["stanza", "spacy", "native"]
         )
-        
+
         # Tagger
         self.tagger = self._select_backend_with_fallback(
             task="tagger",
@@ -58,7 +58,7 @@ class ZomiPipeline:
             },
             fallback_order=["stanza", "spacy"]
         )
-        
+
         # Parser
         self.parser = self._select_backend_with_fallback(
             task="parser",
@@ -69,7 +69,7 @@ class ZomiPipeline:
             },
             fallback_order=["stanza", "spacy"]
         )
-        
+
         # NER
         self.ner = self._select_backend_with_fallback(
             task="ner",
@@ -80,7 +80,7 @@ class ZomiPipeline:
             },
             fallback_order=["spacy", "stanza"]
         )
-    
+
     def _select_backend_with_fallback(
         self,
         task: str,
@@ -89,7 +89,6 @@ class ZomiPipeline:
         fallback_order: List[str]
     ):
         """Select backend with intelligent fallback"""
-        
         # Case 1: User wants a specific backend
         if requested != "auto" and requested != "hybrid":
             backend = self._try_load_backend(task, requested, backend_classes)
@@ -107,7 +106,7 @@ class ZomiPipeline:
                 self.backend_warnings.append(warning_msg)
                 warnings.warn(warning_msg, UserWarning)
                 requested = "auto"  # Fall through to auto
-        
+
         # Case 2: Auto-select (try fallback order)
         if requested == "auto" or requested == "hybrid":
             for backend_name in fallback_order:
@@ -125,7 +124,7 @@ class ZomiPipeline:
                             self.backend_warnings.append(warning_msg)
                             warnings.warn(warning_msg, UserWarning)
                         return backend
-        
+
         # Case 3: No backend available
         warning_msg = (
             f"❌ {task.capitalize()}: No backend available. "
@@ -136,17 +135,17 @@ class ZomiPipeline:
         warnings.warn(warning_msg, UserWarning)
         self.active_backends[task] = "none"
         return None
-    
+
     def _try_load_backend(self, task: str, backend_name: str, backend_classes: Dict[str, tuple]):
         """Try to load a backend, return None if fails"""
         try:
             module_path, class_name = backend_classes[backend_name]
-            
+
             # Dynamic import
             import importlib
             module = importlib.import_module(module_path)
             backend_class = getattr(module, class_name)
-            
+
             # Instantiate with appropriate parameters
             if backend_name == "spacy":
                 backend = backend_class(model_name="en_core_web_sm")
@@ -154,21 +153,21 @@ class ZomiPipeline:
                 backend = backend_class(lang="en")
             else:
                 backend = backend_class()
-            
+
             return backend
         except Exception as e:
             logger.debug(f"Failed to load {backend_name} for {task}: {e}")
             return None
-    
+
     def _log_warnings(self):
         """Log collected warnings"""
         for warning in self.backend_warnings:
             logger.warning(warning)
-    
+
     def __call__(self, text: str) -> ZomiDoc:
         """Process text through the pipeline"""
         doc = ZomiDoc(text)
-        
+
         # Tokenization (required)
         if self.tokenizer:
             try:
@@ -186,7 +185,7 @@ class ZomiPipeline:
         else:
             # No tokenizer available
             doc.tokens = self._simple_tokenize(text)
-        
+
         # POS Tagging (optional)
         if self.tagger and doc.tokens:
             try:
@@ -197,7 +196,7 @@ class ZomiPipeline:
                     pass
             except Exception as e:
                 logger.debug(f"Tagger failed (non-fatal): {e}")
-        
+
         # Dependency Parsing (optional)
         if self.parser and doc.tokens:
             try:
@@ -205,7 +204,7 @@ class ZomiPipeline:
                     doc = self.parser.parse(doc)
             except Exception as e:
                 logger.debug(f"Parser failed (non-fatal): {e}")
-        
+
         # NER (optional)
         if self.ner and doc.tokens:
             try:
@@ -213,15 +212,15 @@ class ZomiPipeline:
                     doc = self.ner.recognize(doc)
             except Exception as e:
                 logger.debug(f"NER failed (non-fatal): {e}")
-        
+
         return doc
-    
+
     def _simple_tokenize(self, text: str) -> List:
         """Simple fallback tokenization that always works"""
         from zomi_nlp.core.token import ZomiToken
         tokens = []
         pos = 0
-        
+
         for word in text.split():
             # Handle punctuation attached to words
             if word and word[-1] in ".,!?;:()[]{}'\"":
@@ -236,13 +235,13 @@ class ZomiPipeline:
             else:
                 tokens.append(ZomiToken(word, pos, pos + len(word)))
                 pos += len(word) + 1
-        
+
         return tokens
-    
+
     def batch_process(self, texts: List[str]) -> List[ZomiDoc]:
         """Process multiple texts in batch"""
         return [self(text) for text in texts]
-    
+
     def get_status(self) -> Dict[str, Any]:
         """Get status of all backends"""
         return {
@@ -264,7 +263,7 @@ class ZomiPipeline:
             },
             "warnings": self.backend_warnings
         }
-    
+
 # """Main orchestrator for Zomi NLP pipeline"""
 
 # import logging
@@ -278,26 +277,26 @@ class ZomiPipeline:
 
 # class ZomiPipeline:
 #     """Main pipeline orchestrator for Zomi NLP"""
-    
+
 #     def __init__(self, config: Optional[ZomiConfig] = None):
 #         self.config = config or ZomiConfig()
 #         self._setup_logging()
-        
+
 #         # Backends
 #         self.tokenizer: Optional[TokenizerBackend] = None
 #         self.tagger: Optional[TaggerBackend] = None
 #         self.parser: Optional[ParserBackend] = None
 #         self.ner: Optional[NERBackend] = None
-        
+
 #         self._initialize_backends()
-    
+
 #     def _setup_logging(self):
 #         if self.config.verbose:
 #             logging.basicConfig(level=getattr(logging, self.config.log_level))
-    
+
 #     def _initialize_backends(self):
 #         """Initialize backends based on configuration"""
-        
+
 #         # Tokenizer
 #         if self.config.tokenizer_backend == "spacy":
 #             from zomi_nlp.adapters.spacy_adapter import SpacyTokenizer
@@ -307,7 +306,7 @@ class ZomiPipeline:
 #             self.tokenizer = StanzaTokenizer()
 #         else:  # auto or hybrid
 #             self.tokenizer = self._select_best_backend("tokenizer")
-        
+
 #         # Tagger
 #         if self.config.tagger_backend == "spacy":
 #             from zomi_nlp.adapters.spacy_adapter import SpacyTagger
@@ -317,7 +316,7 @@ class ZomiPipeline:
 #             self.tagger = StanzaTagger()
 #         else:
 #             self.tagger = self._select_best_backend("tagger")
-        
+
 #         # Parser
 #         if self.config.parser_backend == "spacy":
 #             from zomi_nlp.adapters.spacy_adapter import SpacyParser
@@ -327,7 +326,7 @@ class ZomiPipeline:
 #             self.parser = StanzaParser()
 #         else:
 #             self.parser = self._select_best_backend("parser")
-        
+
 #         # NER
 #         if self.config.ner_backend == "spacy":
 #             from zomi_nlp.adapters.spacy_adapter import SpacyNER
@@ -337,35 +336,35 @@ class ZomiPipeline:
 #             self.ner = StanzaNER()
 #         else:
 #             self.ner = self._select_best_backend("ner")
-    
+
 #     def _select_best_backend(self, task: str):
 #         """Auto-select the best available backend"""
 #         backends = []
-        
+
 #         if task == "tokenizer":
 #             from zomi_nlp.adapters.spacy_adapter import SpacyTokenizer
 #             from zomi_nlp.adapters.stanza_adapter import StanzaTokenizer
-            
+
 #             spacy = SpacyTokenizer()
 #             stanza = StanzaTokenizer()
-            
+
 #             if spacy.is_available():
 #                 backends.append(("spacy", spacy))
 #             if stanza.is_available():
 #                 backends.append(("stanza", stanza))
-        
+
 #         # Return first available (priority order)
 #         if backends:
 #             logger.info(f"Selected {backends[0][0]} for {task}")
 #             return backends[0][1]
-        
+
 #         logger.warning(f"No backend available for {task}")
 #         return None
-    
+
 #     def __call__(self, text: str) -> ZomiDoc:
 #         """Process text through the pipeline"""
 #         doc = ZomiDoc(text)
-        
+
 #         # Tokenization
 #         if self.tokenizer:
 #             try:
@@ -376,42 +375,42 @@ class ZomiPipeline:
 #                     raise
 #                 # Fallback to simple whitespace tokenization
 #                 doc.tokens = self._simple_tokenize(text)
-        
+
 #         # POS Tagging
 #         if self.tagger and doc.tokens:
 #             try:
 #                 doc = self.tagger.tag(doc)
 #             except Exception as e:
 #                 logger.error(f"Tagger failed: {e}")
-        
+
 #         # Dependency Parsing
 #         if self.parser and doc.tokens:
 #             try:
 #                 doc = self.parser.parse(doc)
 #             except Exception as e:
 #                 logger.error(f"Parser failed: {e}")
-        
+
 #         # NER
 #         if self.ner and doc.tokens:
 #             try:
 #                 doc = self.ner.recognize(doc)
 #             except Exception as e:
 #                 logger.error(f"NER failed: {e}")
-        
+
 #         return doc
-    
+
 #     def _simple_tokenize(self, text: str) -> List:
 #         """Simple fallback tokenization"""
 #         from zomi_nlp.core.token import ZomiToken
 #         tokens = []
 #         pos = 0
-        
+
 #         for word in text.split():
 #             tokens.append(ZomiToken(word, pos, pos + len(word)))
 #             pos += len(word) + 1
-        
+
 #         return tokens
-    
+
 #     def batch_process(self, texts: List[str]) -> List[ZomiDoc]:
 #         """Process multiple texts in batch"""
 #         return [self(text) for text in texts]
