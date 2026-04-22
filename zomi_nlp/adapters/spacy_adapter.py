@@ -1,9 +1,8 @@
 """spaCy adapter for Zomi NLP with improved error handling."""
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    import spacy
     from spacy.language import Language
 
 from zomi_nlp.core.doc import ZomiDoc

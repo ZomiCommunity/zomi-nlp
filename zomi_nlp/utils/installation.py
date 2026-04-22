@@ -1,7 +1,7 @@
 """Installation helpers for Zomi NLP dependencies."""
 import subprocess
 import sys
-from typing import Optional, TypedDict, Union
+from typing import Optional, TypedDict
 
 
 class InstallStatus(TypedDict, total=False):
