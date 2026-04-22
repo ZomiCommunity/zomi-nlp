@@ -126,22 +126,22 @@ publish: build
 # -----------------------------
 # Usage: make bump-version part=patch|minor|major
 bump-version:
-    @echo "$(BLUE)Bumping version...$(NC)"
-    @if [ -z "$(part)" ]; then part=patch; else part=$(part); fi; \
-    current=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
-    echo "Current version: $$current"; \
-    IFS='.-' read -r major minor patch extra <<< "$$current"; \
-    case "$$part" in \
-        patch) patch=$$((patch + 1));; \
-        minor) minor=$$((minor + 1)); patch=0;; \
-        major) major=$$((major + 1)); minor=0; patch=0;; \
-        *) echo "$(RED)Invalid part: $(part). Use patch|minor|major$(NC)"; exit 1;; \
-    esac; \
-    new_version="$$major.$$minor.$$patch"; \
-    echo "New version: $$new_version"; \
-    sed -i.bak -E "s/version = \".+\"/version = \"$$new_version\"/" pyproject.toml; \
-    rm pyproject.toml.bak; \
-    echo "$(GREEN)Version bumped to $$new_version$(NC)"
+	@echo "$(BLUE)Bumping version...$(NC)"
+	@if [ -z "$(part)" ]; then part=patch; else part=$(part); fi; \
+	current=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
+	echo "Current version: $$current"; \
+	IFS='.-' read -r major minor patch extra <<< "$$current"; \
+	case "$$part" in \
+		patch) patch=$$((patch + 1));; \
+		minor) minor=$$((minor + 1)); patch=0;; \
+		major) major=$$((major + 1)); minor=0; patch=0;; \
+		*) echo "$(RED)Invalid part: $(part). Use patch|minor|major$(NC)"; exit 1;; \
+	esac; \
+	new_version="$$major.$$minor.$$patch"; \
+	echo "New version: $$new_version"; \
+	sed -i.bak -E "s/version = \".+\"/version = \"$$new_version\"/" pyproject.toml; \
+	rm pyproject.toml.bak; \
+	echo "$(GREEN)Version bumped to $$new_version$(NC)"
 
 
 # -----------------------------
@@ -149,26 +149,26 @@ bump-version:
 # -----------------------------
 
 test-release:
-    @echo "$(GREEN)Running TestPyPI release...$(NC)"
-    ./zomi_nlp/scripts/release-test.sh
+	@echo "$(GREEN)Running TestPyPI release...$(NC)"
+	./zomi_nlp/scripts/release-test.sh
 
 # -----------------------------
 # Full PyPI Release
 # -----------------------------
 
 release:
-    @echo "$(BLUE)Preparing full PyPI release...$(NC)"
-    @version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
-    if echo "$$version" | grep -Eq 'dev|alpha|beta|rc'; then \
-        echo "$(RED)Refusing to release pre-release version ($$version) to PyPI.$(NC)"; \
-        exit 1; \
-    fi; \
-    echo "$(GREEN)Releasing version $$version to PyPI$(NC)"
-    $(MAKE) lint
-    $(MAKE) test
-    $(MAKE) build
-    $(MAKE) publish
-    @echo "$(GREEN)🎉 Release $$version completed successfully! 🎉$(NC)"
+	@echo "$(BLUE)Preparing full PyPI release...$(NC)"
+	@version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
+	if echo "$$version" | grep -Eq 'dev|alpha|beta|rc'; then \
+		echo "$(RED)Refusing to release pre-release version ($$version) to PyPI.$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)Releasing version $$version to PyPI$(NC)"
+	$(MAKE) lint
+	$(MAKE) test
+	$(MAKE) build
+	$(MAKE) publish
+	@echo "$(GREEN)🎉 Release $$version completed successfully! 🎉$(NC)"
 
 
 # -----------------------------
@@ -176,53 +176,53 @@ release:
 # -----------------------------
 
 tag:
-    @echo "$(BLUE)Creating git tag...$(NC)"
-    @version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
-    if echo "$$version" | grep -Eq 'dev|alpha|beta|rc'; then \
-        echo "$(RED)Refusing to tag pre-release version ($$version).$(NC)"; \
-        exit 1; \
-    fi; \
-    tag="v$$version"; \
-    if git rev-parse "$$tag" >/dev/null 2>&1; then \
-        echo "$(RED)Tag $$tag already exists.$(NC)"; \
-        exit 1; \
-    fi; \
-    echo "Tagging $$tag"; \
-    git tag "$$tag"; \
-    git push origin "$$tag"; \
-    echo "$(GREEN)✓ Tag $$tag created and pushed!$(NC)"
+	@echo "$(BLUE)Creating git tag...$(NC)"
+	@version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
+	if echo "$$version" | grep -Eq 'dev|alpha|beta|rc'; then \
+		echo "$(RED)Refusing to tag pre-release version ($$version).$(NC)"; \
+		exit 1; \
+	fi; \
+	tag="v$$version"; \
+	if git rev-parse "$$tag" >/dev/null 2>&1; then \
+		echo "$(RED)Tag $$tag already exists.$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "Tagging $$tag"; \
+	git tag "$$tag"; \
+	git push origin "$$tag"; \
+	echo "$(GREEN)✓ Tag $$tag created and pushed!$(NC)"
 
 # -----------------------------
 # Auto-generate CHANGELOG
 # -----------------------------
 
 changelog:
-    @echo "$(BLUE)Generating changelog entry...$(NC)"
-    @version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
-    if grep -q "## $$version" CHANGELOG.md; then \
-        echo "$(YELLOW)Changelog for version $$version already exists.$(NC)"; \
-        exit 1; \
-    fi; \
-    echo "Creating changelog for version $$version"; \
-    previous_tag=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
-    if [ -z "$$previous_tag" ]; then \
-        echo "$(YELLOW)No previous tag found — using full commit history.$(NC)"; \
-        git_log=$$(git log --pretty=format:"- %s"); \
-    else \
-        echo "Comparing commits since $$previous_tag"; \
-        git_log=$$(git log $$previous_tag..HEAD --pretty=format:"- %s"); \
-    fi; \
-    { \
-        echo "## $$version — $$(date +%Y-%m-%d)"; \
-        echo ""; \
-        echo "$$git_log"; \
-        echo ""; \
-    } >> CHANGELOG.md; \
-    echo "$(GREEN)✓ Changelog updated for version $$version$(NC)"
+	@echo "$(BLUE)Generating changelog entry...$(NC)"
+	@version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
+	if grep -q "## $$version" CHANGELOG.md; then \
+		echo "$(YELLOW)Changelog for version $$version already exists.$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "Creating changelog for version $$version"; \
+	previous_tag=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
+	if [ -z "$$previous_tag" ]; then \
+		echo "$(YELLOW)No previous tag found — using full commit history.$(NC)"; \
+		git_log=$$(git log --pretty=format:"- %s"); \
+	else \
+		echo "Comparing commits since $$previous_tag"; \
+		git_log=$$(git log $$previous_tag..HEAD --pretty=format:"- %s"); \
+	fi; \
+	{ \
+		echo "## $$version — $$(date +%Y-%m-%d)"; \
+		echo ""; \
+		echo "$$git_log"; \
+		echo ""; \
+	} >> CHANGELOG.md; \
+	echo "$(GREEN)✓ Changelog updated for version $$version$(NC)"
 
 
 # Usage: make prep-release part=patch|minor|major
 prep-release:
-    ./zomi_nlp/scripts/prep-release.sh part=$(part)
+	./zomi_nlp/scripts/prep-release.sh part=$(part)
 
 
