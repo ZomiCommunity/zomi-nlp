@@ -24,6 +24,7 @@ help:
 	@echo "$(BLUE)Available commands:$(NC)"
 	@echo "  $(GREEN)install$(NC)      - Install package"
 	@echo "  $(GREEN)install-dev$(NC)  - Install with dev dependencies"
+	@echo "  $(GREEN)quick-test$(NC)   - Run quick tests"
 	@echo "  $(GREEN)test$(NC)         - Run tests"
 	@echo "  $(GREEN)test-all$(NC)     - Run tests on all Python versions (tox)"
 	@echo "  $(GREEN)lint$(NC)         - Run linters"
@@ -53,6 +54,11 @@ install:
 install-dev:
 	@echo "$(GREEN)Installing with dev dependencies...$(NC)"
 	pip install -e ".[dev]"
+
+quick-test:
+	@echo "$(GREEN)Running quick tests...$(NC)"
+	python3 temp/quick_test.py
+	@echo "$(GREEN)Quick tests complete!$(NC)"
 
 test:
 	@echo "$(GREEN)Running tests...$(NC)"
