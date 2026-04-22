@@ -1,3 +1,9 @@
+## v0.1.0-alpha1 - 2026-04-23
+
+- style: apply ruff safe fix
+- refactor: switch to PEP 621 versioning (Option A)
+
+
 ## v0.1.6-alpha1 - 2026-04-23
 
 
