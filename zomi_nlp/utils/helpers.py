@@ -1,0 +1,135 @@
+"""Helper utilities for Zomi NLP"""
+
+import sys
+import subprocess
+from typing import Optional, List
+from pathlib import Path
+
+
+def download_model(model_name: str, backend: str = "auto") -> bool:
+    """
+    Download a model for a specific backend.
+    
+    Args:
+        model_name: Name of the model to download
+        backend: "spacy", "stanza", or "auto"
+    
+    Returns:
+        bool: True if successful
+    
+    Example:
+        >>> from zomi_nlp.utils import download_model
+        >>> download_model("en_core_web_sm", backend="spacy")
+    """
+    if backend == "spacy" or (backend == "auto" and _is_spacy_available()):
+        return _download_spacy_model(model_name)
+    elif backend == "stanza" or (backend == "auto" and _is_stanza_available()):
+        return _download_stanza_model(model_name)
+    else:
+        print(f"❌ Backend '{backend}' not available")
+        return False
+
+
+def _is_spacy_available() -> bool:
+    try:
+        import spacy
+        return True
+    except ImportError:
+        return False
+
+
+def _is_stanza_available() -> bool:
+    try:
+        import stanza
+        return True
+    except ImportError:
+        return False
+
+
+def _download_spacy_model(model_name: str) -> bool:
+    try:
+        subprocess.check_call(
+            [sys.executable, "-m", "spacy", "download", model_name],
+            stdout=subprocess.DEVNULL
+        )
+        print(f"✅ Downloaded {model_name}")
+        return True
+    except:
+        print(f"❌ Failed to download {model_name}")
+        return False
+
+
+def _download_stanza_model(lang: str) -> bool:
+    try:
+        import stanza
+        stanza.download(lang, quiet=True)
+        print(f"✅ Downloaded stanza model for {lang}")
+        return True
+    except:
+        print(f"❌ Failed to download stanza model for {lang}")
+        return False
+
+
+def get_model_info(model_name: str) -> Optional[dict]:
+    """
+    Get information about a model.
+    
+    Args:
+        model_name: Name of the model
+    
+    Returns:
+        Dictionary with model info or None if not found
+    """
+    # Check spaCy models
+    try:
+        import spacy
+        try:
+            nlp = spacy.load(model_name)
+            return {
+                "backend": "spacy",
+                "name": model_name,
+                "lang": nlp.lang,
+                "pipeline": nlp.pipeline_names,
+                "vectors": nlp.vocab.vectors_length if nlp.vocab.vectors_length else None
+            }
+        except:
+            pass
+    except:
+        pass
+    
+    return None
+
+
+def list_available_models() -> List[str]:
+    """
+    List all available models for Zomi NLP.
+    
+    Returns:
+        List of model names
+    
+    Example:
+        >>> from zomi_nlp.utils import list_available_models
+        >>> models = list_available_models()
+        >>> print(models)
+    """
+    models = []
+    
+    # Check spaCy models
+    try:
+        import spacy
+        from spacy.cli.info import info
+        # This is simplified - real implementation would check installed models
+        models.append("en_core_web_sm")
+        models.append("en_core_web_md")
+        models.append("en_core_web_lg")
+    except:
+        pass
+    
+    # Check stanza models
+    try:
+        import stanza
+        models.append("stanza_en")
+    except:
+        pass
+    
+    return models
