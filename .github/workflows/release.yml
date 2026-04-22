@@ -54,8 +54,6 @@ jobs:
       run: |
         pip install twine
         twine upload dist/* \
-          ${{ steps.build.outputs.sdist }} \
-          ${{ steps.build.outputs.wheel }} \
           --repository testpypi \
           --username __token__ \
           --password ${{ secrets.TEST_PYPI_TOKEN }} \
