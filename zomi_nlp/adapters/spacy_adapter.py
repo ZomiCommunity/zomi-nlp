@@ -125,7 +125,8 @@ class SpacyTagger(TaggerBackend):
                 self._available = True
             except OSError:
                 self._available = False
-                self._error_message = f"Model '{self.model_name}' not found. Run: python -m spacy download {self.model_name}"
+                self._error_message = f"Model '{self.model_name}' not found. \
+                Run: python -m spacy download {self.model_name}"
         except ImportError:
             self._available = False
             self._error_message = "spaCy not installed. Run: pip install spacy"

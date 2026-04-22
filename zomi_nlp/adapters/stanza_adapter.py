@@ -1,6 +1,8 @@
 """Stanza adapter for Zomi NLP."""
 
 
+import importlib
+
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
 from zomi_nlp.interfaces import NERBackend, ParserBackend, TaggerBackend, TokenizerBackend
@@ -20,8 +22,8 @@ class StanzaTokenizer(TokenizerBackend):
                 import stanza
                 stanza.download(self.lang, quiet=True)
                 self._nlp = stanza.Pipeline(self.lang, processors="tokenize", use_gpu=False)
-            except ImportError:
-                raise ImportError("stanza not installed. Run: pip install stanza")
+            except ImportError as e:
+                raise ImportError("stanza not installed.  Run: pip install stanza") from e
 
     def tokenize(self, text: str) -> list[ZomiToken]:
         self._load()
@@ -58,11 +60,7 @@ class StanzaTokenizer(TokenizerBackend):
         return self._name
 
     def is_available(self) -> bool:
-        try:
-            import stanza
-            return True
-        except ImportError:
-            return False
+        return importlib.util.find_spec("stanza") is not None
 
 
 class StanzaTagger(TaggerBackend):
@@ -78,8 +76,8 @@ class StanzaTagger(TaggerBackend):
                 import stanza
                 stanza.download(self.lang, quiet=True)
                 self._nlp = stanza.Pipeline(self.lang, processors="tokenize,pos", use_gpu=False)
-            except ImportError:
-                raise ImportError("stanza not installed")
+            except ImportError as e:
+                raise ImportError("stanza not installed.  Run: pip install stanza") from e
 
     def tag(self, doc: ZomiDoc) -> ZomiDoc:
         self._load()
@@ -103,11 +101,7 @@ class StanzaTagger(TaggerBackend):
         return f"stanza_{self.lang}"
 
     def is_available(self) -> bool:
-        try:
-            import stanza
-            return True
-        except ImportError:
-            return False
+        return importlib.util.find_spec("stanza") is not None
 
 
 class StanzaParser(ParserBackend):
@@ -122,9 +116,10 @@ class StanzaParser(ParserBackend):
             try:
                 import stanza
                 stanza.download(self.lang, quiet=True)
-                self._nlp = stanza.Pipeline(self.lang, processors="tokenize,pos,depparse", use_gpu=False)
-            except ImportError:
-                raise ImportError("stanza not installed")
+                self._nlp = stanza.Pipeline(
+                    self.lang, processors="tokenize,pos,depparse", use_gpu=False)
+            except ImportError as e:
+                raise ImportError("stanza not installed.  Run: pip install stanza") from e
 
     def parse(self, doc: ZomiDoc) -> ZomiDoc:
         self._load()
@@ -146,12 +141,7 @@ class StanzaParser(ParserBackend):
         return f"stanza_{self.lang}"
 
     def is_available(self) -> bool:
-        try:
-            import stanza
-            return True
-        except ImportError:
-            return False
-
+        return importlib.util.find_spec("stanza") is not None
 
 class StanzaNER(NERBackend):
     """NER using Stanza."""
@@ -166,8 +156,8 @@ class StanzaNER(NERBackend):
                 import stanza
                 stanza.download(self.lang, quiet=True)
                 self._nlp = stanza.Pipeline(self.lang, processors="tokenize,ner", use_gpu=False)
-            except ImportError:
-                raise ImportError("stanza not installed")
+            except ImportError as e:
+                raise ImportError("stanza not installed.  Run: pip install stanza") from e
 
     def recognize(self, doc: ZomiDoc) -> ZomiDoc:
         self._load()
@@ -186,8 +176,4 @@ class StanzaNER(NERBackend):
         return f"stanza_{self.lang}"
 
     def is_available(self) -> bool:
-        try:
-            import stanza
-            return True
-        except ImportError:
-            return False
+        return importlib.util.find_spec("stanza") is not None

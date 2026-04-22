@@ -97,7 +97,8 @@ class ZomiPipeline:
                 return backend
             else:
                 # User requested specific but unavailable
-                error_msg = backend.get_error_message() if backend else f"{requested} backend unavailable"
+                error_msg = backend.get_error_message() if backend else \
+                    f"{requested} backend unavailable"
                 warning_msg = (
                     f"⚠️ {task.capitalize()}: Requested backend '{requested}' unavailable. "
                     f"Reason: {error_msg}. "
@@ -177,7 +178,8 @@ class ZomiPipeline:
                 else:
                     # Tokenizer returned empty - use fallback
                     doc.tokens = self._simple_tokenize(text)
-                    if self.tokenizer.get_error_message() if hasattr(self.tokenizer, 'get_error_message') else False:
+                    if self.tokenizer.get_error_message() \
+                          if hasattr(self.tokenizer, 'get_error_message') else False:
                         pass  # Already warned
             except Exception as e:
                 logger.error(f"Tokenizer failed: {e}")

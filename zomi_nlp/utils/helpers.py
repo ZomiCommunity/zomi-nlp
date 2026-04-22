@@ -1,6 +1,7 @@
 """Helper utilities for Zomi NLP."""
 
 import contextlib
+import importlib
 import subprocess
 import sys
 from typing import Optional
@@ -30,20 +31,10 @@ def download_model(model_name: str, backend: str = "auto") -> bool:
 
 
 def _is_spacy_available() -> bool:
-    try:
-        import spacy
-        return True
-    except ImportError:
-        return False
-
+    return importlib.util.find_spec("spacy") is not None
 
 def _is_stanza_available() -> bool:
-    try:
-        import stanza
-        return True
-    except ImportError:
-        return False
-
+    return importlib.util.find_spec("stanza") is not None
 
 def _download_spacy_model(model_name: str) -> bool:
     try:
@@ -53,8 +44,8 @@ def _download_spacy_model(model_name: str) -> bool:
         )
         print(f"✅ Downloaded {model_name}")
         return True
-    except:
-        print(f"❌ Failed to download {model_name}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Failed to download {model_name}: {e}")
         return False
 
 
@@ -64,8 +55,8 @@ def _download_stanza_model(lang: str) -> bool:
         stanza.download(lang, quiet=True)
         print(f"✅ Downloaded stanza model for {lang}")
         return True
-    except:
-        print(f"❌ Failed to download stanza model for {lang}")
+    except ImportError as e:
+        print(f"❌ Failed to download stanza model for {lang}: {e}")
         return False
 
 
@@ -90,10 +81,10 @@ def get_model_info(model_name: str) -> Optional[dict]:
                 "pipeline": nlp.pipeline_names,
                 "vectors": nlp.vocab.vectors_length if nlp.vocab.vectors_length else None
             }
-        except:
-            pass
-    except:
-        pass
+        except OSError as e:
+            print(f"❌ Error loading spaCy model '{model_name}': {e}")
+    except ImportError as e:
+        print(f"❌ spaCy not available: {e}")
 
     return None
 
@@ -117,7 +108,7 @@ def list_available_models() -> list[str]:
         models.append("en_core_web_sm")
         models.append("en_core_web_md")
         models.append("en_core_web_lg")
-    except:
+    except Exception:
         pass
 
     # Check stanza models

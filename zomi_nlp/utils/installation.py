@@ -106,7 +106,7 @@ def check_installation(verbose: bool = True) -> dict[str, dict]:
 
     # Check Stanza
     try:
-        import stanza
+        import stanza  # noqa: F401
         status["stanza"]["installed"] = True
         status["stanza"]["model_available"] = True  # Stanza downloads on demand
     except ImportError:
@@ -220,7 +220,7 @@ def auto_install_recommended(interactive: bool = True) -> bool:
                 stdout=subprocess.DEVNULL
             )
             print("✅ spaCy installed")
-        except:
+        except subprocess.CalledProcessError:
             print("❌ Failed to install spaCy")
             success = False
 
@@ -237,8 +237,8 @@ def auto_install_recommended(interactive: bool = True) -> bool:
                 stdout=subprocess.DEVNULL
             )
             print("✅ stanza installed")
-        except:
-            print("❌ Failed to install stanza")
+        except (ImportError, subprocess.CalledProcessError, OSError) as e:
+            print("❌ Failed to install stanza", e)
             success = False
 
     if success:
