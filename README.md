@@ -1,7 +1,7 @@
 # Zomi NLP
 
 [![PyPI version](https://badge.fury.io/py/zomi-nlp.svg)](https://badge.fury.io/py/zomi-nlp)
-[![CI](https://github.com/zomi-community/zomi-nlp/actions/workflows/ci.yml/badge.svg)](https://github.com/zomi-community/zomi-nlp/actions/workflows/ci.yml)
+[![CI](https://github.com/ZomiCommunity/zomi-nlp/actions/workflows/ci.yml/badge.svg)](https://github.com/ZomiCommunity/zomi-nlp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zomi-nlp.svg)](https://pypi.org/project/zomi-nlp/)
 
@@ -16,15 +16,41 @@ Natural Language Processing toolkit for the **Zomi language (Zopau)**.
 - 🔌 **Pluggable Backends** - Use spaCy, Stanza, or native implementations
 - 🚀 **Production Ready** - CI/CD, type hints, comprehensive testing
 
-## Installation
+## Requirements
+
+- Python 3.9 or higher
+- pip (latest version recommended)
+
+## Dependencies
+
+Zomi NLP works with either spaCy or Stanza as backends. If both are installed,
+it will prefer Stanza (more accurate) but fall back to spaCy (faster) if needed.
+
+### Installation Options
+
+### Minimal Installation (Basic Tokenization Only)
 
 ```bash
 pip install zomi-nlp
+```
 
-# With optional backends:
-pip install "zomi-nlp[spacy]"   # For spaCy backend
-pip install "zomi-nlp[stanza]"  # For Stanza backend
-pip install "zomi-nlp[full]"    # All backends
+### With spaCy (Recommended for Speed)
+
+```bash
+pip install 'zomi-nlp[spacy]'
+python -m spacy download en_core_web_sm
+```
+
+### With Stanza (Recommended for Accuracy)
+
+```bash
+pip install 'zomi-nlp[stanza]'
+```
+
+### Full installation (Both Backends)
+
+```bash
+pip install 'zomi-nlp[full]'
 ```
 
 ## Quick Start
@@ -32,7 +58,7 @@ pip install "zomi-nlp[full]"    # All backends
 ```python
 from zomi_nlp import load
 
-# Load the pipeline
+# Load the pipeline (auto-selects best available backend)
 nlp = load()
 
 # Process text
@@ -52,6 +78,7 @@ for token in doc:
 ```
 
 ## Configuration
+
 ```
 from zomi_nlp import ZomiConfig, ZomiPipeline
 
@@ -63,15 +90,60 @@ nlp = ZomiPipeline(config)
 config = ZomiConfig(tokenizer_backend="stanza", tagger_backend="stanza")
 nlp = ZomiPipeline(config)
 
-# Auto-select best available
+# Auto-select best available (recommended)
 config = ZomiConfig(tokenizer_backend="auto")
 nlp = ZomiPipeline(config)
 ```
 
+## Checking Installation
+
+```python
+from zomi_nlp import check_installation
+
+# Check what's installed
+check_installation()
+
+# Get status as dict
+status = check_installation(verbose=False)
+print(status)
+```
+
+## Troubleshooting
+
+### "stanza not installed" Warning
+
+If you see warnings about stanza, you have two options:
+
+1. Install stanza (better accuracy):
+
+```python
+pip install stanza
+```
+
+2. Use spaCy instead (change your config):
+
+```python
+config = ZomiConfig(tokenizer_backend="spacy")
+```
+
+### "No backend available" Error
+
+Install at least one backend:
+
+```python
+pip install 'zomi-nlp[full]'
+```
+
+### Getting `None` Values for POS Tags
+
+This happens when no backend is available. The library falls back to a simple
+tokenizer. Install spaCy or stanza for full functionality.
+
 ## Development
+
 ```bash
 # Clone repository
-git clone https://github.com/zomi-community/zomi-nlp.git
+git clone https://github.com/ZomiCommunity/zomi-nlp.git
 cd zomi-nlp
 
 # Install with dev dependencies
@@ -82,6 +154,9 @@ pytest tests/
 
 # Run linting
 ruff check zomi_nlp/
+
+# Format code
+black zomi_nlp/ tests/
 ```
 
 ## Roadmap
@@ -92,23 +167,33 @@ ruff check zomi_nlp/
 - v0.4.0 - Zomi dependency parser
 - v1.0.0 - Fully native implementation
 
+## Contributing
+
+Contributions welcome! See CONTRIBUTING.md for guidelines.
+
 ## License
+
 Apache License 2.0
 
 ## Citation
+
 ```bibtex
 @software{zomi_nlp_2026,
   title={Zomi NLP: Natural Language Processing for Zomi Language},
   author={Zomi NLP Community},
   year={2026},
-  url={https://github.com/zomi-community/zomi-nlp}
+  url={https://github.com/ZomiCommunity/zomi-nlp}
 }
 ```
 
-## Contributing
-Contributions welcome! See CONTRIBUTING.md for guidelines.
+## Acknowledgments
+
+- Built with ❤️ for the Zomi community
+- Uses spaCy and Stanza as backends
+- Inspired by universal dependencies framework
 
 ### `Makefile`
+
 ```makefile
 .PHONY: install install-dev test lint format clean build publish help
 
