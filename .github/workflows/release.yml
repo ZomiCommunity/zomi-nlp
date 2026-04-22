@@ -29,6 +29,11 @@ jobs:
       id: build
       uses: hynek/build-and-inspect-python-package@v2
 
+    - name: Debug build outputs
+      run: |
+        echo "sdist: '${{ steps.build.outputs.sdist }}'"
+        echo "wheel: '${{ steps.build.outputs.wheel }}'"
+
     - name: Detect pre-release
       id: prerelease
       run: |
@@ -39,11 +44,16 @@ jobs:
           echo "is_prerelease=false" >> $GITHUB_OUTPUT
         fi
 
+    - name: Build package for upload
+      run: |
+        pip install build
+        python -m build
+
     - name: Upload to TestPyPI
       if: steps.prerelease.outputs.is_prerelease == 'true'
       run: |
         pip install twine
-        twine upload \
+        twine upload dist/* \
           ${{ steps.build.outputs.sdist }} \
           ${{ steps.build.outputs.wheel }} \
           --repository testpypi \
