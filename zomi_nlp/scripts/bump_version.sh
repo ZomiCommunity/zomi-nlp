@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION_FILE="version.py"
+VERSION_FILE="zomi_nlp/version.py"
 CHANGELOG_FILE="CHANGELOG.md"
 
 # --- SAFETY CHECKS ---------------------------------------------------------
