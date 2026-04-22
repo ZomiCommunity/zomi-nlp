@@ -1,9 +1,9 @@
 """Helper utilities for Zomi NLP."""
 
 import contextlib
-import importlib
 import subprocess
 import sys
+from importlib.util import find_spec
 from typing import Optional
 
 
@@ -31,10 +31,10 @@ def download_model(model_name: str, backend: str = "auto") -> bool:
 
 
 def _is_spacy_available() -> bool:
-    return importlib.util.find_spec("spacy") is not None
+    return find_spec("spacy") is not None
 
 def _is_stanza_available() -> bool:
-    return importlib.util.find_spec("stanza") is not None
+    return find_spec("stanza") is not None
 
 def _download_spacy_model(model_name: str) -> bool:
     try:
