@@ -83,9 +83,17 @@ echo "Updated version: $CURRENT_VERSION → $NEW_VERSION"
 
 echo "Generating changelog..."
 
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+if [[ -n "$LAST_TAG" ]]; then
+  LOG_RANGE="$LAST_TAG..HEAD"
+else
+  LOG_RANGE="HEAD"
+fi
+
 NEW_CHANGELOG="## v$NEW_VERSION - $(date +%Y-%m-%d)
 
-$(git log --pretty=format:'- %s' $(git describe --tags --abbrev=0 2>/dev/null)..HEAD)
+$(git log --pretty=format:'- %s' $LOG_RANGE)
 
 "
 
