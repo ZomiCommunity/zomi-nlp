@@ -19,41 +19,46 @@ NC := \033[0m # No Color
 # High-level commands
 # -----------------------------
 
-help:
-	@echo ""
-	@echo "$(BLUE)Available commands:$(NC)"
-	@echo "  $(GREEN)install$(NC)      - Install package"
-	@echo "  $(GREEN)install-dev$(NC)  - Install with dev dependencies"
-	@echo "  $(GREEN)minimal-install-dev$(NC)  - Install with minimal dev dependencies"
-	@echo "  $(GREEN)quick-test$(NC)   - Run quick tests"
-	@echo "  $(GREEN)test$(NC)         - Run tests"
-	@echo "  $(GREEN)test-all$(NC)     - Run tests on all Python versions (tox)"
-	@echo "  $(GREEN)lint$(NC)         - Run linters"
-	@echo "  $(GREEN)format$(NC)       - Format code"
-	@echo "  $(GREEN)check$(NC)        - Run all checks (lint + test)"
-	@echo "  $(GREEN)pre-commit$(NC)   - Run pre-commit hooks"
-	@echo "  $(GREEN)clean$(NC)        - Clean build artifacts"
-	@echo "  $(GREEN)clean-all$(NC)    - Deep clean (including venv)"
-	@echo "  $(GREEN)build$(NC)        - Build package distribution (wheel + sdist)"
-	@echo "  $(GREEN)publish$(NC)      - Publish to PyPI"
-	@echo "  $(GREEN)bump-version$(NC) - Bump package version"
-	@echo "  $(GREEN)test-release$(NC) - Build and upload a timestamped dev version to TestPyPI"
-	@echo "  $(GREEN)release$(NC)      - Full release (lint + test + build + publish)"
-	@echo "  $(GREEN)tag$(NC)          - Create and push a git tag"
-	@echo "  $(GREEN)change-log$(NC)      - Generate CHANGELOG.md from git history"
-	@echo "  $(GREEN)prep-release$(NC)    - Run release prep script (bump version, update changelog, tag)"
-	@echo ""
+help: ## Show this help message
+	@echo "Auto‑generated help:"
+	@grep -E '^[a-zA-Z_-]+:.*?## ' Makefile | sort | \
+	awk 'BEGIN {FS = ":.*?## "}; {printf "%-25s %s\n", $$1, $$2}'
+
+# 	@echo ""
+# 	@echo "$(BLUE)Available commands:$(NC)"
+# 	@echo "  $(GREEN)install$(NC)      - Install package"
+# 	@echo "  $(GREEN)install-dev$(NC)  - Install with dev dependencies"
+# 	@echo "  $(GREEN)minimal-install-dev$(NC)  - Install with minimal dev dependencies"
+# 	@echo "  $(GREEN)quick-test$(NC)   - Run quick tests"
+# 	@echo "  $(GREEN)test$(NC)         - Run tests"
+# 	@echo "  $(GREEN)test-all$(NC)     - Run tests on all Python versions (tox)"
+# 	@echo "  $(GREEN)lint$(NC)         - Run linters"
+# 	@echo "  $(GREEN)format$(NC)       - Format code"
+# 	@echo "  $(GREEN)check$(NC)        - Run all checks (lint + test)"
+# 	@echo "  $(GREEN)pre-commit$(NC)   - Run pre-commit hooks"
+# 	@echo "  $(GREEN)clean$(NC)        - Clean build artifacts"
+# 	@echo "  $(GREEN)clean-all$(NC)    - Deep clean (including venv)"
+# 	@echo "  $(GREEN)build$(NC)        - Build package distribution (wheel + sdist)"
+# 	@echo "  $(GREEN)publish$(NC)      - Publish to PyPI"
+# 	@echo "  $(GREEN)bump-version$(NC) - Bump package version"
+# 	@echo "  $(GREEN)test-release$(NC) - Build and upload a timestamped dev version to TestPyPI"
+# 	@echo "  $(GREEN)release$(NC)      - Full release (lint + test + build + publish)"
+# 	@echo "  $(GREEN)tag$(NC)          - Create and push a git tag"
+# 	@echo "  $(GREEN)change-log$(NC)      - Generate CHANGELOG.md from git history"
+# 	@echo "  $(GREEN)prep-release$(NC)    - Run release prep script (bump version, update changelog, tag)"
+# 	@echo "  $(GREEN)sanity-check-commit$(NC) - Check commit before pushing (git status + diff)"
+# 	@echo ""
 
 # -----------------------------
 # Development commands
 # -----------------------------
 
 
-install:
+install: ## Install package
 	@echo "$(GREEN)Installing package...$(NC)"
 	pip install .
 
-install-dev:
+install-dev: ## Install with dev dependencies
 	@echo "$(GREEN)Installing with dev dependencies...$(NC)"
 	pip install -e ".[dev]"
 
@@ -82,40 +87,40 @@ install-dev:
 # git commit                                    # Git operations
 # pytest                                        # Run test suite
 ###############################################################################
-minimal-install-dev:
+minimal-install-dev: ## Install minimal editable dev environment
 	@echo "$(GREEN)Installing with dev minimal...$(NC)"
 	pip install -e .
 
-quick-test:
+quick-test: ## Run quick tests (smoke test, basic functionality)
 	@echo "$(GREEN)Running quick tests...$(NC)"
 	python3 temp/quick_test.py
 	@echo "$(GREEN)Quick tests complete!$(NC)"
 
-test:
+test: ## Run tests
 	@echo "$(GREEN)Running tests...$(NC)"
 	pytest tests/ -v --cov=zomi_nlp --cov-report=term --cov-report=html
 	@echo "$(GREEN)Tests complete! Coverage report: htmlcov/index.html$(NC)"
 
-test-all:
+test-all: ## Run tests on all Python versions
 	@echo "$(GREEN)Running tests on all Python versions...$(NC)"
 	tox
 
-lint:
+lint: ## Lint code
 	@echo "$(YELLOW)Linting code...$(NC)"
 	ruff check zomi_nlp/
 	mypy zomi_nlp/ --ignore-missing-imports
 	@echo "$(GREEN)Linting complete!$(NC)"
 
-format:
+format: ## Format code
 	@echo "$(YELLOW)Formatting code...$(NC)"
 	black zomi_nlp/ tests/
 	ruff check --fix zomi_nlp/
 	@echo "$(GREEN)Formatting complete!$(NC)"
 
-check: lint test
+check: lint test ## Run all checks (lint + test)
 	@echo "$(GREEN)✓ All checks passed!$(NC)"
 
-pre-commit:
+pre-commit: ## Run pre-commit hooks
 	@echo "$(YELLOW)Running pre-commit hooks...$(NC)"
 	pre-commit run --all-files
 	@echo "$(GREEN)Pre-commit complete!$(NC)"
@@ -124,7 +129,7 @@ pre-commit:
 # Build commands
 # -----------------------------
 
-clean:
+clean: ## Clean build artifacts
 	@echo "$(YELLOW)Cleaning build artifacts...$(NC)"
 	rm -rf build/
 	rm -rf dist/
@@ -138,7 +143,7 @@ clean:
 	find . -type f -name "*.pyc" -delete
 	@echo "$(GREEN)Clean complete!$(NC)"
 
-clean-all: clean
+clean-all: clean ## Deep clean (includes virtual environment)
 	@echo "$(YELLOW)Deep cleaning...$(NC)"
 	rm -rf .venv/
 	rm -rf .tox/
@@ -147,13 +152,13 @@ clean-all: clean
 	find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
 	@echo "$(GREEN)Deep clean complete!$(NC)"
 
-build: clean
+build: clean ## Build package distribution (wheel + sdist)
 	@echo "$(GREEN)Building package distribution...$(NC)"
 	python -m build
 	twine check dist/*
 	@echo "$(GREEN)Build complete!$(NC)"
 
-publish: build
+publish: build ## Publish to PyPI
 	@echo "$(GREEN)Publishing to PyPI...$(NC)"
 	twine upload dist/*
 	@echo "$(GREEN)Published successfully!$(NC)"
@@ -162,7 +167,7 @@ publish: build
 # Version bumping
 # -----------------------------
 # Usage: make bump-version part=patch|minor|major
-bump-version:
+bump-version: ## Bump package version (patch, minor, major)
 	@echo "$(BLUE)Bumping version...$(NC)"
 	@if [ -z "$(part)" ]; then part=patch; else part=$(part); fi; \
 	current=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
@@ -185,7 +190,7 @@ bump-version:
 # Release commands
 # -----------------------------
 
-test-release:
+test-release: ## Build and upload a timestamped dev version to TestPyPI
 	@echo "$(GREEN)Running TestPyPI release...$(NC)"
 	./zomi_nlp/scripts/release-test.sh
 
@@ -193,7 +198,7 @@ test-release:
 # Full PyPI Release
 # -----------------------------
 
-release:
+release: ## Usage: make release
 	@echo "$(BLUE)Preparing full PyPI release...$(NC)"
 	@version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
 	if echo "$$version" | grep -Eq 'dev|alpha|beta|rc'; then \
@@ -212,7 +217,7 @@ release:
 # Git Tagging
 # -----------------------------
 
-tag:
+tag: ## Create and push a git tag based on the current version in pyproject.toml
 	@echo "$(BLUE)Creating git tag...$(NC)"
 	@version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
 	if echo "$$version" | grep -Eq 'dev|alpha|beta|rc'; then \
@@ -233,7 +238,7 @@ tag:
 # Auto-generate CHANGELOG
 # -----------------------------
 
-changelog:
+changelog: ## Generate CHANGELOG.md entry from git history since last tag
 	@echo "$(BLUE)Generating changelog entry...$(NC)"
 	@version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
 	if grep -q "## $$version" CHANGELOG.md; then \
@@ -259,7 +264,16 @@ changelog:
 
 
 # Usage: make prep-release part=patch|minor|major
-prep-release:
+prep-release: ## Run release prep script (bump version, update changelog, tag)
+	@echo "$(BLUE)Running release prep...$(NC)"
 	./zomi_nlp/scripts/prep-release.sh part=$(part)
 
-
+sanity-check-commit: ## Show git status, unstaged diff, and staged diff
+	@echo "=== Git Status ==="
+	@git status
+	@echo ""
+	@echo "=== Unstaged Changes (git diff) ==="
+	@git diff
+	@echo ""
+	@echo "=== Staged Changes (git diff --cached) ==="
+	@git diff --cached
