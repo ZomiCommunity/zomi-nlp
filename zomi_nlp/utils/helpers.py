@@ -52,7 +52,7 @@ def _download_spacy_model(model_name: str) -> bool:
 def _download_stanza_model(lang: str) -> bool:
     try:
         import stanza
-        stanza.download(lang, quiet=True)
+        stanza.download(lang)
         print(f"✅ Downloaded stanza model for {lang}")
         return True
     except ImportError as e:

@@ -58,7 +58,7 @@ def install_stanza_model(lang: str = "en") -> bool:
     print(f"📦 Installing stanza model for '{lang}'...")
     try:
         import stanza
-        stanza.download(lang, quiet=True)
+        stanza.download(lang)
         print(f"✅ Successfully installed {lang} model")
         return True
     except ImportError:
