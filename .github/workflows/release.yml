@@ -36,33 +36,41 @@ jobs:
       - name: List built files
         run: ls -la dist/
 
-      - name: Detect pre-release
+      - name: Detect release type
         id: prerelease
         run: |
+          # Get the tag name (e.g., v0.2.0, v0.2.0a1, v0.2.0.dev1)
           TAG="${GITHUB_REF#refs/tags/}"
-          if [[ "$TAG" =~ [a-zA-Z] ]]; then
+          
+          # Check if this is a pre-release (contains a, b, rc, dev)
+          if [[ "$TAG" =~ (a|b|rc|dev) ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            echo "✅ Detected as PRE-RELEASE (will upload to TestPyPI)"
+            echo "target=testpypi" >> $GITHUB_OUTPUT
+            echo "✅ Detected as PRE-RELEASE -> TestPyPI"
           else
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
-            echo "✅ Detected as PRODUCTION RELEASE (will upload to PyPI)"
+            echo "target=pypi" >> $GITHUB_OUTPUT
+            echo "✅ Detected as PRODUCTION RELEASE -> PyPI"
           fi
 
-      - name: Upload to TestPyPI (pre-releases)
+      - name: Upload to TestPyPI (pre-releases only)
         if: steps.prerelease.outputs.is_prerelease == 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
         run: |
           twine upload dist/* \
             --repository-url https://test.pypi.org/legacy/ \
-            --username __token__ \
-            --password ${{ secrets.TEST_PYPI_TOKEN }}
-        continue-on-error: true
+            --verbose
 
-      - name: Upload to PyPI (production)
+      - name: Upload to PyPI (production releases only)
         if: steps.prerelease.outputs.is_prerelease == 'false'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           twine upload dist/* \
-            --username __token__ \
-            --password ${{ secrets.PYPI_API_TOKEN }}
+            --verbose
 
       - name: Upload artifacts to GitHub Release
         uses: softprops/action-gh-release@v1
@@ -74,14 +82,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Summary of build
+      - name: Summary
         if: always()
         run: |
           echo "=========================================="
           echo "📦 RELEASE SUMMARY"
           echo "=========================================="
           echo "Release type: ${{ steps.prerelease.outputs.is_prerelease == 'true' && 'PRE-RELEASE' || 'PRODUCTION' }}"
+          echo "Target: ${{ steps.prerelease.outputs.target }}"
           echo ""
-          echo "Built files:"
+          echo "Files:"
           ls -la ./dist/
           echo "=========================================="
