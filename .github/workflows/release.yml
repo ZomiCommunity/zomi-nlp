@@ -11,7 +11,6 @@ on:
         required: true
 
 permissions:
-  id-token: write
   contents: write
 
 jobs:
@@ -29,7 +28,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install build tools
-        run: pip install build
+        run: pip install build twine
 
       - name: Build package
         run: python -m build
@@ -41,30 +40,29 @@ jobs:
         id: prerelease
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          if [[ "$TAG" =~ [a-zA-Z] ]] || [[ "${{ github.event.inputs.version }}" =~ [a-zA-Z] ]]; then
+          if [[ "$TAG" =~ [a-zA-Z] ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            echo "✅ Detected as PRE-RELEASE"
+            echo "✅ Detected as PRE-RELEASE (will upload to TestPyPI)"
           else
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
-            echo "✅ Detected as PRODUCTION RELEASE"
+            echo "✅ Detected as PRODUCTION RELEASE (will upload to PyPI)"
           fi
 
       - name: Upload to TestPyPI (pre-releases)
         if: steps.prerelease.outputs.is_prerelease == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: ./dist
-          attestations: true
-          verbose: true
+        run: |
+          twine upload dist/* \
+            --repository-url https://test.pypi.org/legacy/ \
+            --username __token__ \
+            --password ${{ secrets.TEST_PYPI_TOKEN }}
+        continue-on-error: true
 
       - name: Upload to PyPI (production)
         if: steps.prerelease.outputs.is_prerelease == 'false'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: ./dist
-          attestations: true
-          verbose: true
+        run: |
+          twine upload dist/* \
+            --username __token__ \
+            --password ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Upload artifacts to GitHub Release
         uses: softprops/action-gh-release@v1
@@ -84,6 +82,6 @@ jobs:
           echo "=========================================="
           echo "Release type: ${{ steps.prerelease.outputs.is_prerelease == 'true' && 'PRE-RELEASE' || 'PRODUCTION' }}"
           echo ""
-          echo "Files uploaded:"
+          echo "Built files:"
           ls -la ./dist/
           echo "=========================================="
