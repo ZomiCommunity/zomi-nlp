@@ -27,7 +27,7 @@ jobs:
         with:
           # Fetch all history for accurate versioning, changelog generation,
           # and to ensure we have all tags
-          fetch-depth: 0  generation
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -54,14 +54,12 @@ jobs:
                 dist="${{ steps.build.outputs.dist }}"
                 if [ -n "$dist" ] && [ -d "$dist" ]; then
                   echo "✅ Build outputs directory exists: $dist"
-                fi
-
-                echo "Contents:"
-                ls -la ${{ steps.build.outputs.dist }}
-                echo "build_success=true" >> $GITHUB_OUTPUT
+                  echo "Contents:"
+                  ls -la "$dist"
+                  echo "build_success=true" >> $GITHUB_OUTPUT
                 else
-                echo "❌ Build outputs not found or empty"
-                echo "build_success=false" >> $GITHUB_OUTPUT
+                  echo "❌ Build outputs not found or empty"
+                  echo "build_success=false" >> $GITHUB_OUTPUT
                 fi
         id: check_build
 
@@ -84,14 +82,14 @@ jobs:
 
             # Verify build succeeded
             if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
-            echo "✅ Manual build successful"
-            echo "Contents:"
-            ls -la dist/
-            echo "manual_build_success=true" >> $GITHUB_OUTPUT
+              echo "✅ Manual build successful"
+              echo "Contents:"
+              ls -la dist/
+              echo "manual_build_success=true" >> $GITHUB_OUTPUT
             else
-            echo "❌ Manual build failed"
-            echo "manual_build_success=false" >> $GITHUB_OUTPUT
-            exit 1
+              echo "❌ Manual build failed"
+              echo "manual_build_success=false" >> $GITHUB_OUTPUT
+              exit 1
             fi
         id: manual_build
 
@@ -102,14 +100,13 @@ jobs:
             dist="${{ steps.build.outputs.dist }}"
             if [ -n "$dist" ] && [ -d "$dist" ]; then
               echo "dist_dir=$dist" >> "$GITHUB_OUTPUT"
-            fi
-            echo "source=hynek_action" >> $GITHUB_OUTPUT
+              echo "source=hynek_action" >> $GITHUB_OUTPUT
             elif [ -d "dist" ] && [ "$(ls -A dist)" ]; then
-            echo "dist_dir=./dist" >> $GITHUB_OUTPUT
-            echo "source=manual_build" >> $GITHUB_OUTPUT
+              echo "dist_dir=./dist" >> $GITHUB_OUTPUT
+              echo "source=manual_build" >> $GITHUB_OUTPUT
             else
-            echo "❌ No build artifacts found"
-            exit 1
+              echo "❌ No build artifacts found"
+              exit 1
             fi
 
             echo "Using dist directory: ${{ env.dist_dir }} (source: ${{ env.source }})"
@@ -132,13 +129,13 @@ jobs:
             VERSION="${{ github.event.inputs.version }}"
 
             if [[ "$TAG" =~ [a-zA-Z] ]] || [[ "$VERSION" =~ [a-zA-Z] ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            echo "repository=testpypi" >> $GITHUB_OUTPUT
-            echo "✅ Detected as PRE-RELEASE"
+              echo "is_prerelease=true" >> $GITHUB_OUTPUT
+              echo "repository=testpypi" >> $GITHUB_OUTPUT
+              echo "✅ Detected as PRE-RELEASE"
             else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
-            echo "repository=pypi" >> $GITHUB_OUTPUT
-            echo "✅ Detected as PRODUCTION RELEASE"
+              echo "is_prerelease=false" >> $GITHUB_OUTPUT
+              echo "repository=pypi" >> $GITHUB_OUTPUT
+              echo "✅ Detected as PRODUCTION RELEASE"
             fi
 
       - name: Upload to TestPyPI (pre-releases)
@@ -164,8 +161,8 @@ jobs:
           files: |
             ${{ steps.final_dist.outputs.dist_dir }}/*.whl
             ${{ steps.final_dist.outputs.dist_dir }}/*.tar.gz
-            body_path: CHANGELOG.md
-            generate_release_notes: false
+          body_path: CHANGELOG.md
+          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
