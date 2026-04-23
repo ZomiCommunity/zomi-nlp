@@ -1,5 +1,6 @@
 """Stanza adapter for Zomi NLP."""
 
+from importlib.util import find_spec
 from typing import Optional
 
 from zomi_nlp.core.doc import ZomiDoc
@@ -22,11 +23,10 @@ class StanzaTokenizer(TokenizerBackend):
         if self._available is not None:
             return self._available
 
-        try:
-            import stanza
+        if find_spec("stanza") is not None:
             self._available = True
             self._error_message = None
-        except ImportError:
+        else:
             self._available = False
             self._error_message = "stanza not installed. Run: pip install stanza"
 
@@ -35,11 +35,11 @@ class StanzaTokenizer(TokenizerBackend):
     def _load(self):
         """Lazy load stanza pipeline."""
         if self._nlp is None:
-            return 
-        
+            return
+
         if not self._check_availability():
             return
-        
+
         try:
             import stanza
             # Remove quiet parameter - not supported in all versions
@@ -114,11 +114,10 @@ class StanzaTagger(TaggerBackend):
         if self._available is not None:
             return self._available
 
-        try:
-            import stanza
+        if find_spec("stanza") is not None:
             self._available = True
             self._error_message = None
-        except ImportError:
+        else:
             self._available = False
             self._error_message = "stanza not installed. Run: pip install stanza"
 
@@ -186,11 +185,10 @@ class StanzaParser(ParserBackend):
         if self._available is not None:
             return self._available
 
-        try:
-            import stanza
+        if find_spec("stanza") is not None:
             self._available = True
             self._error_message = None
-        except ImportError:
+        else:
             self._available = False
             self._error_message = "stanza not installed. Run: pip install stanza"
 
@@ -257,11 +255,10 @@ class StanzaNER(NERBackend):
         if self._available is not None:
             return self._available
 
-        try:
-            import stanza
+        if find_spec("stanza") is not None:
             self._available = True
             self._error_message = None
-        except ImportError:
+        else:
             self._available = False
             self._error_message = "stanza not installed. Run: pip install stanza"
 
@@ -270,10 +267,10 @@ class StanzaNER(NERBackend):
     def _load(self):
         if self._nlp is None:
             return
-        
+
         if not self._check_availability():
             return
-        
+
         try:
             import stanza
             stanza.download(self.lang, quiet=True)
