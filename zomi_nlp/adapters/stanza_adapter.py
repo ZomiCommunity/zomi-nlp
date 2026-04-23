@@ -1,7 +1,6 @@
 """Stanza adapter for Zomi NLP."""
 
-
-import importlib.util
+from typing import Optional
 
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
@@ -15,19 +14,50 @@ class StanzaTokenizer(TokenizerBackend):
         self.lang = lang
         self._nlp = None
         self._name = f"stanza_{lang}"
+        self._available: Optional[bool] = None
+        self._error_message: Optional[str] = None
+
+    def _check_availability(self) -> bool:
+        """Check if stanza is available and return status."""
+        if self._available is not None:
+            return self._available
+
+        try:
+            import stanza
+            self._available = True
+            self._error_message = None
+        except ImportError:
+            self._available = False
+            self._error_message = "stanza not installed. Run: pip install stanza"
+
+        return self._available
 
     def _load(self):
+        """Lazy load stanza pipeline."""
         if self._nlp is None:
-            try:
-                import stanza
-                stanza.download(self.lang, quiet=True)
-                self._nlp = stanza.Pipeline(self.lang, processors="tokenize", use_gpu=False)
-            except ImportError as e:
-                raise ImportError("stanza not installed.  Run: pip install stanza") from e
+            return 
+        
+        if not self._check_availability():
+            return
+        
+        try:
+            import stanza
+            stanza.download(self.lang, quiet=True)
+            self._nlp = stanza.Pipeline(self.lang, processors="tokenize", use_gpu=False)
+        except ImportError as e:
+            raise ImportError("stanza not installed. Run: pip install stanza") from e
+        except Exception as e:
+            self._error_message = f"Failed to load stanza model: {e}"
+            raise
 
     def tokenize(self, text: str) -> list[ZomiToken]:
+        if not self._check_availability():
+            return []
+
         self._load()
-        assert self._nlp is not None, "Pipeline not initialized"
+        if self._nlp is None:
+            return []
+
         stanza_doc = self._nlp(text)
         tokens = []
         idx = 0
@@ -61,7 +91,12 @@ class StanzaTokenizer(TokenizerBackend):
         return self._name
 
     def is_available(self) -> bool:
-        return importlib.util.find_spec("stanza") is not None
+        return self._check_availability()
+
+    def get_error_message(self) -> Optional[str]:
+        """Get error message if backend unavailable."""
+        self._check_availability()
+        return self._error_message
 
 
 class StanzaTagger(TaggerBackend):
@@ -70,20 +105,42 @@ class StanzaTagger(TaggerBackend):
     def __init__(self, lang: str = "en"):
         self.lang = lang
         self._nlp = None
+        self._available: Optional[bool] = None
+        self._error_message: Optional[str] = None
+
+    def _check_availability(self) -> bool:
+        if self._available is not None:
+            return self._available
+
+        try:
+            self._available = True
+            self._error_message = None
+        except OSError:
+            self._available = False
+            self._error_message = "stanza not installed. Run: pip install stanza"
+
+        return self._available
 
     def _load(self):
-        if self._nlp is None:
+        if self._nlp is None and self._check_availability():
             try:
                 import stanza
                 stanza.download(self.lang, quiet=True)
                 self._nlp = stanza.Pipeline(self.lang, processors="tokenize,pos", use_gpu=False)
             except ImportError as e:
-                raise ImportError("stanza not installed.  Run: pip install stanza") from e
+                raise ImportError("stanza not installed. Run: pip install stanza") from e
+            except Exception as e:
+                self._error_message = f"Failed to load stanza model: {e}"
+                raise
 
     def tag(self, doc: ZomiDoc) -> ZomiDoc:
+        if not self._check_availability():
+            return doc
+
         self._load()
         if self._nlp is None:
-            raise RuntimeError("Pipeline not initialized")
+            return doc
+
         stanza_doc = self._nlp(doc.text)
         idx = 0
 
@@ -104,7 +161,12 @@ class StanzaTagger(TaggerBackend):
         return f"stanza_{self.lang}"
 
     def is_available(self) -> bool:
-        return importlib.util.find_spec("stanza") is not None
+        return self._check_availability()
+
+    def get_error_message(self) -> Optional[str]:
+        """Get error message if backend unavailable."""
+        self._check_availability()
+        return self._error_message
 
 
 class StanzaParser(ParserBackend):
@@ -113,21 +175,43 @@ class StanzaParser(ParserBackend):
     def __init__(self, lang: str = "en"):
         self.lang = lang
         self._nlp = None
+        self._available: Optional[bool] = None
+        self._error_message: Optional[str] = None
+
+    def _check_availability(self) -> bool:
+        if self._available is not None:
+            return self._available
+
+        try:
+            self._available = True
+            self._error_message = None
+        except OSError:
+            self._available = False
+            self._error_message = "stanza not installed. Run: pip install stanza"
+
+        return self._available
 
     def _load(self):
-        if self._nlp is None:
+        if self._nlp is None and self._check_availability():
             try:
                 import stanza
                 stanza.download(self.lang, quiet=True)
                 self._nlp = stanza.Pipeline(
                     self.lang, processors="tokenize,pos,depparse", use_gpu=False)
             except ImportError as e:
-                raise ImportError("stanza not installed.  Run: pip install stanza") from e
+                raise ImportError("stanza not installed. Run: pip install stanza") from e
+            except Exception as e:
+                self._error_message = f"Failed to load stanza model: {e}"
+                raise
 
     def parse(self, doc: ZomiDoc) -> ZomiDoc:
+        if not self._check_availability():
+            return doc
+
         self._load()
         if self._nlp is None:
-            raise RuntimeError("Pipeline not initialized")
+            return doc
+
         stanza_doc = self._nlp(doc.text)
         idx = 0
 
@@ -146,7 +230,13 @@ class StanzaParser(ParserBackend):
         return f"stanza_{self.lang}"
 
     def is_available(self) -> bool:
-        return importlib.util.find_spec("stanza") is not None
+        return self._check_availability()
+
+    def get_error_message(self) -> Optional[str]:
+        """Get error message if backend unavailable."""
+        self._check_availability()
+        return self._error_message
+
 
 class StanzaNER(NERBackend):
     """NER using Stanza."""
@@ -154,19 +244,42 @@ class StanzaNER(NERBackend):
     def __init__(self, lang: str = "en"):
         self.lang = lang
         self._nlp = None
+        self._available: Optional[bool] = None
+        self._error_message: Optional[str] = None
+
+    def _check_availability(self) -> bool:
+        if self._available is not None:
+            return self._available
+
+        try:
+            self._available = True
+            self._error_message = None
+        except OSError:
+            self._available = False
+            self._error_message = "stanza not installed. Run: pip install stanza"
+
+        return self._available
 
     def _load(self):
-        if self._nlp is None:
+        if self._nlp is None and self._check_availability():
             try:
                 import stanza
                 stanza.download(self.lang, quiet=True)
                 self._nlp = stanza.Pipeline(self.lang, processors="tokenize,ner", use_gpu=False)
             except ImportError as e:
-                raise ImportError("stanza not installed.  Run: pip install stanza") from e
+                raise ImportError("stanza not installed. Run: pip install stanza") from e
+            except Exception as e:
+                self._error_message = f"Failed to load stanza model: {e}"
+                raise
 
     def recognize(self, doc: ZomiDoc) -> ZomiDoc:
+        if not self._check_availability():
+            return doc
+
         self._load()
-        assert self._nlp is not None, "Pipeline not initialized"
+        if self._nlp is None:
+            return doc
+
         stanza_doc = self._nlp(doc.text)
 
         for sentence in stanza_doc.sentences:
@@ -182,4 +295,9 @@ class StanzaNER(NERBackend):
         return f"stanza_{self.lang}"
 
     def is_available(self) -> bool:
-        return importlib.util.find_spec("stanza") is not None
+        return self._check_availability()
+
+    def get_error_message(self) -> Optional[str]:
+        """Get error message if backend unavailable."""
+        self._check_availability()
+        return self._error_message

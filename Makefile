@@ -24,6 +24,7 @@ help:
 	@echo "$(BLUE)Available commands:$(NC)"
 	@echo "  $(GREEN)install$(NC)      - Install package"
 	@echo "  $(GREEN)install-dev$(NC)  - Install with dev dependencies"
+	@echo "  $(GREEN)minimal-install-dev$(NC)  - Install with minimal dev dependencies"
 	@echo "  $(GREEN)quick-test$(NC)   - Run quick tests"
 	@echo "  $(GREEN)test$(NC)         - Run tests"
 	@echo "  $(GREEN)test-all$(NC)     - Run tests on all Python versions (tox)"
@@ -47,6 +48,7 @@ help:
 # Development commands
 # -----------------------------
 
+
 install:
 	@echo "$(GREEN)Installing package...$(NC)"
 	pip install .
@@ -54,6 +56,35 @@ install:
 install-dev:
 	@echo "$(GREEN)Installing with dev dependencies...$(NC)"
 	pip install -e ".[dev]"
+
+###############################################################################
+# This target is for users who want to contribute but don't need all the heavy dependencies for testing, linting, etc. It installs only the core dev dependencies needed for development and quick testing.
+# ✅ YES - Run this: pip install -e .
+# - Create NEW Python file | Package metadata needs update
+# - Add new optional dependency (e.g. stanza) | Update install-dev and minimal-install-dev
+# - Delete a Python file | Package structure changed
+# - Refactor code | Package structure changed
+# - Move/rename a file | Package structure changed
+# - Edit pyproject.toml | Package metadata needs update, Dependencies or config changed
+# - Edit README.md | Package metadata needs update
+# - Add new dependency | Need to install new package
+# - Change entry points/scripts | CLI commands need update
+# - Add new data files | Package data needs inclusion, Package structure changed, Need to include new files in distribution
+# touch zomi_nlp/new_file.py                    # New file created
+# rm zomi_nlp/old_file.py                       # File deleted
+# mv zomi_nlp/file.py zomi_nlp/moved.py         # File moved
+# nano pyproject.toml                           # Changed config
+# pip install numpy                             # Added to dependencies
+
+# # ❌ NO - Don't need to run:
+# nano zomi_nlp/existing_file.py                # Edit existing file
+# python test_local.py                          # Run tests
+# git commit                                    # Git operations
+# pytest                                        # Run test suite
+###############################################################################
+minimal-install-dev:
+	@echo "$(GREEN)Installing with dev minimal...$(NC)"
+	pip install -e .
 
 quick-test:
 	@echo "$(GREEN)Running quick tests...$(NC)"
