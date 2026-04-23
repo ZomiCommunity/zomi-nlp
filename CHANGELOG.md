@@ -1,3 +1,24 @@
+# Changelog
+
+All notable changes to the Zomi NLP library will be documented in this file.
+
+## [0.2.0] - 2026-01-23
+### Added
+- First stable release on official PyPI
+- Complete spaCy backend (tokenization, POS, parsing, NER)
+- Complete Stanza backend (tokenization, POS, parsing, NER, lemmatization)
+- Shared Stanza pipeline to prevent duplicate downloads
+- Comprehensive test suite (11/11 tests passing)
+- GitHub Actions CI/CD pipeline
+- CLI interface (`zomi-nlp` command)
+- Installation helpers and utilities
+
+### Fixed
+- Stanza `download()` quiet parameter compatibility
+- Proper lemmatization support in Stanza tagger
+- Graceful fallback when backends unavailable
+- Version management with dynamic reading from pyproject.toml
+
 ## v0.1.6-alpha4 - 2026-04-23
 
 - fix: correct release workflow for test upload
