@@ -42,11 +42,13 @@ class StanzaTokenizer(TokenizerBackend):
         
         try:
             import stanza
-            stanza.download(self.lang, quiet=True)
+            # Remove quiet parameter - not supported in all versions
+            stanza.download(self.lang)
             self._nlp = stanza.Pipeline(self.lang, processors="tokenize", use_gpu=False)
         except ImportError as e:
             raise ImportError("stanza not installed. Run: pip install stanza") from e
         except Exception as e:
+            self._available = False
             self._error_message = f"Failed to load stanza model: {e}"
             raise
 
@@ -113,9 +115,10 @@ class StanzaTagger(TaggerBackend):
             return self._available
 
         try:
+            import stanza
             self._available = True
             self._error_message = None
-        except OSError:
+        except ImportError:
             self._available = False
             self._error_message = "stanza not installed. Run: pip install stanza"
 
@@ -125,11 +128,12 @@ class StanzaTagger(TaggerBackend):
         if self._nlp is None and self._check_availability():
             try:
                 import stanza
-                stanza.download(self.lang, quiet=True)
+                stanza.download(self.lang)
                 self._nlp = stanza.Pipeline(self.lang, processors="tokenize,pos", use_gpu=False)
             except ImportError as e:
                 raise ImportError("stanza not installed. Run: pip install stanza") from e
             except Exception as e:
+                self._available = False
                 self._error_message = f"Failed to load stanza model: {e}"
                 raise
 
@@ -183,9 +187,10 @@ class StanzaParser(ParserBackend):
             return self._available
 
         try:
+            import stanza
             self._available = True
             self._error_message = None
-        except OSError:
+        except ImportError:
             self._available = False
             self._error_message = "stanza not installed. Run: pip install stanza"
 
@@ -195,12 +200,13 @@ class StanzaParser(ParserBackend):
         if self._nlp is None and self._check_availability():
             try:
                 import stanza
-                stanza.download(self.lang, quiet=True)
+                stanza.download(self.lang)
                 self._nlp = stanza.Pipeline(
                     self.lang, processors="tokenize,pos,depparse", use_gpu=False)
             except ImportError as e:
                 raise ImportError("stanza not installed. Run: pip install stanza") from e
             except Exception as e:
+                self._available = False
                 self._error_message = f"Failed to load stanza model: {e}"
                 raise
 
@@ -252,25 +258,32 @@ class StanzaNER(NERBackend):
             return self._available
 
         try:
+            import stanza
             self._available = True
             self._error_message = None
-        except OSError:
+        except ImportError:
             self._available = False
             self._error_message = "stanza not installed. Run: pip install stanza"
 
         return self._available
 
     def _load(self):
-        if self._nlp is None and self._check_availability():
-            try:
-                import stanza
-                stanza.download(self.lang, quiet=True)
-                self._nlp = stanza.Pipeline(self.lang, processors="tokenize,ner", use_gpu=False)
-            except ImportError as e:
-                raise ImportError("stanza not installed. Run: pip install stanza") from e
-            except Exception as e:
-                self._error_message = f"Failed to load stanza model: {e}"
-                raise
+        if self._nlp is None:
+            return
+        
+        if not self._check_availability():
+            return
+        
+        try:
+            import stanza
+            stanza.download(self.lang, quiet=True)
+            self._nlp = stanza.Pipeline(self.lang, processors="tokenize,ner", use_gpu=False)
+        except ImportError as e:
+            raise ImportError("stanza not installed. Run: pip install stanza") from e
+        except Exception as e:
+            self._available = False
+            self._error_message = f"Failed to load stanza model: {e}"
+            raise
 
     def recognize(self, doc: ZomiDoc) -> ZomiDoc:
         if not self._check_availability():
