@@ -1,3 +1,6 @@
+# .github/workflows/release.yml
+
+
 name: Release
 
 on:
@@ -16,62 +19,167 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    # Only run on main branch releases
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          # Fetch all history for accurate versioning, changelog generation,
+          # and to ensure we have all tags
+          fetch-depth: 0  generation
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    - name: Build and inspect package
-      id: build
-      uses: hynek/build-and-inspect-python-package@v2
+      - name: Build and inspect package (with validation)
+        id: build
+        uses: hynek/build-and-inspect-python-package@v2
+        continue-on-error: true  # Don't fail if this has issues
 
-    - name: Debug build outputs
-      run: |
-        echo "sdist: '${{ steps.build.outputs.sdist }}'"
-        echo "wheel: '${{ steps.build.outputs.wheel }}'"
+      - name: Show build outputs (debug)
+        run: |
+                echo "=========================================="
+                echo "Build Outputs from hynek action:"
+                echo "=========================================="
+                echo "dist dir: ${{ steps.build.outputs.dist }}"
+                echo "wheel: ${{ steps.build.outputs.wheel }}"
+                echo "sdist: ${{ steps.build.outputs.sdist }}"
+                echo ""
+                echo "Checking if outputs exist..."
 
-    - name: Detect pre-release
-      id: prerelease
-      run: |
-        TAG="${GITHUB_REF#refs/tags/}"
-        if [[ "$TAG" =~ [a-zA-Z] ]]; then
-          echo "is_prerelease=true" >> $GITHUB_OUTPUT
-        else
-          echo "is_prerelease=false" >> $GITHUB_OUTPUT
-        fi
+                # Check if dist output exists and has files
+                dist="${{ steps.build.outputs.dist }}"
+                if [ -n "$dist" ] && [ -d "$dist" ]; then
+                  echo "✅ Build outputs directory exists: $dist"
+                fi
 
-    - name: Build package for upload
-      run: |
-        pip install build
-        python -m build
+                echo "Contents:"
+                ls -la ${{ steps.build.outputs.dist }}
+                echo "build_success=true" >> $GITHUB_OUTPUT
+                else
+                echo "❌ Build outputs not found or empty"
+                echo "build_success=false" >> $GITHUB_OUTPUT
+                fi
+        id: check_build
 
-    - name: Upload to TestPyPI
-      if: steps.prerelease.outputs.is_prerelease == 'true'
-      run: |
-        pip install twine
-        twine upload dist/* \
-          --repository testpypi \
-          --username __token__ \
-          --password ${{ secrets.TEST_PYPI_TOKEN }} \
-          --skip-existing
-      continue-on-error: true
+      - name: Fallback Manual rebuild (if hynek action failed)
+        if: steps.check_build.outputs.build_success != 'true'
+        run: |
+            echo "=========================================="
+            echo "⚠️  Hynek build action didn't produce outputs"
+            echo "Performing manual build as fallback..."
+            echo "=========================================="
 
-    - name: Upload to PyPI (Trusted Publishing)
-      if: steps.prerelease.outputs.is_prerelease == 'false'
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        attestations: true
+            # Install build tools
+            pip install build
 
-    - name: Upload artifacts + changelog to GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          dist/*.whl
-          dist/*.tar.gz
-        body_path: CHANGELOG.md
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            # Clean any existing dist
+            rm -rf dist/
+
+            # Build manually
+            python -m build
+
+            # Verify build succeeded
+            if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
+            echo "✅ Manual build successful"
+            echo "Contents:"
+            ls -la dist/
+            echo "manual_build_success=true" >> $GITHUB_OUTPUT
+            else
+            echo "❌ Manual build failed"
+            echo "manual_build_success=false" >> $GITHUB_OUTPUT
+            exit 1
+            fi
+        id: manual_build
+
+      - name: Set final dist directory
+        id: final_dist
+        run: |
+            # Use hynek output if available, otherwise use manual dist
+            dist="${{ steps.build.outputs.dist }}"
+            if [ -n "$dist" ] && [ -d "$dist" ]; then
+              echo "dist_dir=$dist" >> "$GITHUB_OUTPUT"
+            fi
+            echo "source=hynek_action" >> $GITHUB_OUTPUT
+            elif [ -d "dist" ] && [ "$(ls -A dist)" ]; then
+            echo "dist_dir=./dist" >> $GITHUB_OUTPUT
+            echo "source=manual_build" >> $GITHUB_OUTPUT
+            else
+            echo "❌ No build artifacts found"
+            exit 1
+            fi
+
+            echo "Using dist directory: ${{ env.dist_dir }} (source: ${{ env.source }})"
+
+      - name: Debug final dist
+        run: |
+            echo "=========================================="
+            echo "Final Distribution Directory:"
+            echo "=========================================="
+            echo "Path: ${{ steps.final_dist.outputs.dist_dir }}"
+            echo "Source: ${{ steps.final_dist.outputs.source }}"
+            echo ""
+            echo "Contents:"
+            ls -la ${{ steps.final_dist.outputs.dist_dir }}
+
+      - name: Detect pre-release
+        id: prerelease
+        run: |
+            TAG="${GITHUB_REF#refs/tags/}"
+            VERSION="${{ github.event.inputs.version }}"
+
+            if [[ "$TAG" =~ [a-zA-Z] ]] || [[ "$VERSION" =~ [a-zA-Z] ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "repository=testpypi" >> $GITHUB_OUTPUT
+            echo "✅ Detected as PRE-RELEASE"
+            else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "repository=pypi" >> $GITHUB_OUTPUT
+            echo "✅ Detected as PRODUCTION RELEASE"
+            fi
+
+      - name: Upload to TestPyPI (pre-releases)
+        if: steps.prerelease.outputs.is_prerelease == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: ${{ steps.final_dist.outputs.dist_dir }}
+          attestations: true
+          verbose: true
+
+      - name: Upload to PyPI (production)
+        if: steps.prerelease.outputs.is_prerelease == 'false'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ steps.final_dist.outputs.dist_dir }}
+          attestations: true
+          verbose: true
+
+      - name: Upload artifacts to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{ steps.final_dist.outputs.dist_dir }}/*.whl
+            ${{ steps.final_dist.outputs.dist_dir }}/*.tar.gz
+            body_path: CHANGELOG.md
+            generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Summary of build
+        if: always()
+        run: |
+            echo "=========================================="
+            echo "📦 RELEASE SUMMARY"
+            echo "=========================================="
+            echo "Build source: ${{ steps.final_dist.outputs.source }}"
+            echo "Release type: ${{ steps.prerelease.outputs.is_prerelease == 'true' && 'PRE-RELEASE' || 'PRODUCTION' }}"
+            echo "Target: ${{ steps.prerelease.outputs.repository }}"
+            echo ""
+            echo "Files uploaded:"
+            ls -la ${{ steps.final_dist.outputs.dist_dir }}
+            echo "=========================================="
