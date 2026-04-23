@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zomi-nlp"
-version = "0.1.6-alpha4"
+version = "0.2.0"  # ← Update from 0.1.6a4 to 0.2.0
 description = "Natural Language Processing for Zomi Language (Zopau)"
 readme = "README.md"
 authors = [
