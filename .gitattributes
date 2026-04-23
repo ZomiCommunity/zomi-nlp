@@ -9,8 +9,8 @@
 *.rst text
 # Config files
 *.json text
-*.yaml text
-*.yml text
+*.yaml text eol=lf
+*.yml text eol=lf
 *.toml text
 *.ini text
 *.cfg text
