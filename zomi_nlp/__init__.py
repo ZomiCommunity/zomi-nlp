@@ -1,10 +1,10 @@
+# zomi_nlp/__init__.py
 """Zomi NLP - Natural Language Processing for Zomi Language."""
 
 from zomi_nlp.config import ZomiConfig
+from zomi_nlp.native import ZomiParser, ZomiParserV362, ZomiRuleBasedParser  # Expose native parser
 from zomi_nlp.pipeline.orchestrator import ZomiPipeline
-
-# Import convenience utilities
-from zomi_nlp.utils.installation import (
+from zomi_nlp.utils.installation import (  # Import convenience utilities
     auto_install_recommended,
     check_installation,
     install_spacy_model,
@@ -19,7 +19,10 @@ __all__ = [
     "install_spacy_model",
     "install_stanza_model",
     "check_installation",
-    "auto_install_recommended"
+    "auto_install_recommended",
+    "ZomiParserV362",
+    "ZomiRuleBasedParser",
+    "ZomiParser",
 ]
 
 

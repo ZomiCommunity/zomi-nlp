@@ -1,3 +1,4 @@
+# zomi-nlp/zomi_nlp/pipeline/orchestrator.py
 """Main orchestrator for Zomi NLP pipeline with smart fallback."""
 
 import logging
@@ -64,10 +65,12 @@ class ZomiPipeline:
             task="parser",
             requested=self.config.parser_backend,
             backend_classes={
+                "native": ("zomi_nlp.adapters.zomi_rule_based_parser_backend",
+                           "ZomiRuleBasedParserBackend"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyParser"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaParser"),
             },
-            fallback_order=["stanza", "spacy"]
+            fallback_order=["native", "stanza", "spacy"]
         )
 
         # NER

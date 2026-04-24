@@ -1,3 +1,7 @@
+# zomi-nlp/tests/test_core.py
+"""Tests for core Zomi NLP components."""
+
+
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
 
@@ -37,3 +41,33 @@ class TestZomiDoc:
         d = doc.to_dict()
         assert d["text"] == "Ka zoh na ve."
         assert len(d["tokens"]) == 2
+
+class TestZomiRuleBasedParser:
+    """Test the ZomiRuleBasedParser directly."""
+
+    def test_parser_parses_text(self):
+        """Test that ZomiRuleBasedParser can parse text."""
+        from zomi_nlp.native import ZomiRuleBasedParser
+
+        parser = ZomiRuleBasedParser()
+        result = parser.parse("Ka zoh na ve.")
+        assert result is not None
+        assert len(result) > 0
+
+    def test_zomi_rule_based_parser_import(self):
+        """Test that ZomiRuleBasedParser can be imported."""
+        from zomi_nlp.native import ZomiRuleBasedParser
+        parser = ZomiRuleBasedParser()
+        assert parser is not None
+
+    def test_zomi_rule_based_parser_backend_in_orchestrator(self):
+        """Test that ZomiRuleBasedParser backend is registered."""
+        from zomi_nlp import ZomiPipeline, ZomiConfig # noqa: I001
+
+        config = ZomiConfig(parser_backend="native")
+        nlp = ZomiPipeline(config)
+
+        # Check that native backend was selected
+        status = nlp.get_status()
+        assert status['parser']['active'] == 'native'
+        assert status['parser']['available'] is True
