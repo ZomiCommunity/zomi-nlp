@@ -1,9 +1,9 @@
 # Zomi NLP
 
-[![PyPI version](https://badge.fury.io/py/zomi-nlp.svg)](https://badge.fury.io/py/zomi-nlp)
-[![CI](https://github.com/ZomiCommunity/zomi-nlp/actions/workflows/ci.yml/badge.svg)](https://github.com/ZomiCommunity/zomi-nlp/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![PyPI version](https://badge.fury.io/py/zomi-nlp.svg)](https://pypi.org/project/zomi-nlp/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zomi-nlp.svg)](https://pypi.org/project/zomi-nlp/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![CI](https://github.com/ZomiCommunity/zomi-nlp/actions/workflows/ci.yml/badge.svg)](https://github.com/ZomiCommunity/zomi-nlp/actions/workflows/ci.yml)
 
 Natural Language Processing toolkit for the **Zomi language (Zopau)**.
 
