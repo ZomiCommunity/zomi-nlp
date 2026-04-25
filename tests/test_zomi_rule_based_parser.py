@@ -136,13 +136,6 @@ class TestZomiParserAliases:
         result = parser.parse("Ka pai hi.")
         assert len(result) > 0
 
-    # def test_zomi_parser_alias(self):
-    #     from zomi_nlp.native import ZomiParser
-        
-    #     parser = ZomiParser()
-    #     result = parser.parse("Ka pai hi.")  
-    #     assert len(result) > 0
-
     def test_zomi_parser_v362_alias(self):
         """Test ZomiParserV362 alias for backward compatibility."""
         from zomi_nlp.native import ZomiParserV362
