@@ -2,7 +2,29 @@
 
 All notable changes to the Zomi NLP library will be documented in this file.
 
-## [0.2.0] - 2026-01-23
+## [0.3.0] - 2026-04-25
+
+### Added
+- **ZomiRuleBasedParser** - Complete rule-based Zomi NLP backend
+  - 600+ lexicon entries
+  - Clitic handling (`ve`, `ta`, `hiam`, etc.)
+  - Dependency parsing with CoNLL-U output
+  - Constituency tree generation
+  - 16-column CoNLL-U export with metadata
+- Native backend as primary parser
+- `zomi-nlp --doctor` command for diagnostics
+- Better error messages for missing dependencies
+
+### Changed
+- Auto-backend selection now prefers ZomiRuleBasedParser
+- Improved fallback chain: native → stanza → spacy
+
+### Fixed
+- ZomiToken parameter naming consistency
+- CLI argument parsing for `--doctor` command
+- Backend adapter conversion to ZomiDoc
+
+## [0.2.0] - 2026-04-23
 ### Added
 - First stable release on official PyPI
 - Complete spaCy backend (tokenization, POS, parsing, NER)
