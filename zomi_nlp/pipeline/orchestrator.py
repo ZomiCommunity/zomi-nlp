@@ -130,6 +130,22 @@ class ZomiPipeline:
                         return backend
 
         # Case 3: No backend available
+        if backend and not backend.is_available():
+            error_msg = backend.get_error_message() \
+                if backend else f"{requested} backend unavailable"
+
+            # Check if it's a spaCy model issue specifically
+            if requested == "spacy" and "model" in error_msg.lower():
+                error_msg += "\n   → Fix: Run 'python -m spacy download en_core_web_sm'"
+
+            warning_msg = (
+                f"⚠️ {task.capitalize()}: Requested backend '{requested}' unavailable.\n"
+                f"   Reason: {error_msg}\n"
+                f"   Falling back to auto-selection.\n"
+                f"   📖 See: https://github.com/ZomiCommunity/zomi-nlp#installation"
+            )
+
+        # Case 3: No backend available
         warning_msg = (
             f"❌ {task.capitalize()}: No backend available. "
             f"Install spaCy (pip install spacy) or stanza (pip install stanza). "

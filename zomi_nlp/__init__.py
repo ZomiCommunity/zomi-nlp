@@ -7,6 +7,9 @@ from zomi_nlp.pipeline.orchestrator import ZomiPipeline
 from zomi_nlp.utils.installation import (  # Import convenience utilities
     auto_install_recommended,
     check_installation,
+    check_spacy_model,
+    get_installation_advice,
+    get_installation_status,
     install_spacy_model,
     install_stanza_model,
 )
@@ -19,6 +22,9 @@ __all__ = [
     "install_spacy_model",
     "install_stanza_model",
     "check_installation",
+    "get_installation_status",
+    "get_installation_advice",
+    "check_spacy_model",
     "auto_install_recommended",
     "ZomiParserV362",
     "ZomiRuleBasedParser",

@@ -1,6 +1,8 @@
+# zomi_nlp/utils/installation.py
 """Installation helpers for Zomi NLP dependencies."""
 import subprocess
 import sys
+from importlib.util import find_spec
 from typing import Optional, TypedDict
 
 
@@ -10,6 +12,48 @@ class InstallStatus(TypedDict, total=False):
     error: Optional[str]
     version: Optional[str]
     ready: bool
+
+
+def check_spacy_model() -> dict:
+    """Check if spaCy model is available and return status."""
+    try:
+        import spacy
+        try:
+            spacy.load("en_core_web_sm")
+            return {"available": True, "model": "en_core_web_sm", "loaded": True}
+        except OSError:
+            # Model not downloaded
+            return {
+                "available": False,
+                "model": "en_core_web_sm",
+                "error": "Model not downloaded",
+                "fix_command": "python -m spacy download en_core_web_sm"
+            }
+    except ImportError:
+        return {
+            "available": False,
+            "error": "spaCy not installed",
+            "fix_command": "pip install spacy",
+        }
+
+
+def get_installation_advice() -> str:
+    """Get user-friendly installation advice."""
+    advice = []
+
+    # Check spaCy
+    spacy_status = check_spacy_model()
+    if not spacy_status.get("available", False) and "fix_command" in spacy_status:
+            advice.append(f"  • {spacy_status['fix_command']}")
+
+    # Check stanza
+    if find_spec("stanza") is not None:
+        # Stanza is installed, but may need model download
+        advice.append("  • stanza is installed (models download on first use)")
+    else:
+        advice.append("  • pip install stanza  (optional, for better accuracy)")
+
+    return "\n".join(advice) if advice else "  ✅ All dependencies satisfied!"
 
 def install_spacy_model(model_name: str = "en_core_web_sm") -> bool:
     """Helper to install spaCy model.
