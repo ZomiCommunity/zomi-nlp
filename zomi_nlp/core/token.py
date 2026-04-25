@@ -1,38 +1,44 @@
+# zomi_nlp/core/token.py
 """Pure Zomi token implementation - no external dependencies."""
 
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
 
+@dataclass
 class ZomiToken:
     """Token representation - independent of any external library."""
 
-    def __init__(
-        self,
-        text: str,
-        start_char: int,
-        end_char: int,
-        idx: int = 0,
-        sent_idx: int = 0
-    ):
-        self.text = text
-        self.start_char = start_char
-        self.end_char = end_char
-        self.idx = idx
-        self.sent_idx = sent_idx
+    # Core token attributes
+    text: str
+    start_char: int
+    end_char: int
+    idx: int = 0
+    sent_idx: int = 0
 
-        # Linguistic annotations (will be filled by processors)
-        self.pos_: Optional[str] = None
-        self.tag_: Optional[str] = None
-        self.lemma_: Optional[str] = None
-        self.dep_: Optional[str] = None
-        self.head: int = -1
-        self.ent_type_: Optional[str] = None
-        self.ent_iob_: Optional[str] = None
-        self.morph: dict[str, str] = {}
+    # CoNLL-U style fields (optional, for direct mapping)
+    form: str = ""  # Alias for text
+    lemma: Optional[str] = None
+    upos: Optional[str] = None  # Universal POS (instead of pos_)
+    xpos: Optional[str] = None   # Treebank-specific POS
+    feats: Optional[str] = None  # Morphological features
+    head: int = -1
+    deprel: Optional[str] = None
+    deps: Optional[str] = None
+    misc: Optional[str] = None
 
-        # Zomi-specific
-        self.is_clitic: bool = False
-        self.clitic_type: Optional[str] = None  # "ve", "ta", "hiam", etc.
+    # Linguistic annotations (will be filled by processors)
+    pos_: Optional[str] = None
+    tag_: Optional[str] = None
+    lemma_: Optional[str] = None
+    dep_: Optional[str] = None
+    ent_type_: Optional[str] = None
+    ent_iob_: Optional[str] = None
+    morph: dict[str, str] = field(default_factory=dict)
+
+    # Zomi-specific
+    is_clitic: bool = False
+    clitic_type: Optional[str] = None  # "ve", "ta", "hiam", etc.
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to JSON-serializable dict."""

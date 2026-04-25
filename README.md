@@ -110,6 +110,18 @@ print(status)
 
 ## Troubleshooting
 
+### Check your installation
+
+```bash
+zomi-nlp --check
+```
+
+### Diagnose issues automatically
+
+```bash
+zomi-nlp --doctor
+```
+
 ### "stanza not installed" Warning
 
 If you see warnings about stanza, you have two options:
@@ -191,57 +203,3 @@ Apache License 2.0
 - Built with ❤️ for the Zomi community
 - Uses spaCy and Stanza as backends
 - Inspired by universal dependencies framework
-
-### `Makefile`
-
-```makefile
-.PHONY: install install-dev test lint format clean build publish help
-
-help:
-	@echo "Available commands:"
-	@echo "  install     - Install package"
-	@echo "  install-dev - Install with dev dependencies"
-	@echo "  test        - Run tests"
-	@echo "  lint        - Run linters"
-	@echo "  format      - Format code"
-	@echo "  clean       - Clean build artifacts"
-	@echo "  build       - Build distribution"
-	@echo "  publish     - Publish to PyPI"
-
-install:
-	pip install .
-
-install-dev:
-	pip install -e ".[dev]"
-
-test:
-	pytest tests/ -v --cov=zomi_nlp
-
-lint:
-	ruff check zomi_nlp/
-	mypy zomi_nlp/ --ignore-missing-imports
-
-format:
-	black zomi_nlp/ tests/
-	ruff check --fix zomi_nlp/
-
-clean:
-	rm -rf build/
-	rm -rf dist/
-	rm -rf *.egg-info
-	rm -rf .pytest_cache/
-	rm -rf .mypy_cache/
-	rm -rf .ruff_cache/
-	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete
-
-build: clean
-	python -m build
-	twine check dist/*
-
-publish: build
-	twine upload dist/*
-
-release: lint test build publish
-	@echo "Release completed!"
-```

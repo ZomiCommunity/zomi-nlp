@@ -1,3 +1,4 @@
+# zomi-nlp/zomi_nlp/pipeline/orchestrator.py
 """Main orchestrator for Zomi NLP pipeline with smart fallback."""
 
 import logging
@@ -64,10 +65,12 @@ class ZomiPipeline:
             task="parser",
             requested=self.config.parser_backend,
             backend_classes={
+                "native": ("zomi_nlp.adapters.zomi_rule_based_parser_backend",
+                           "ZomiRuleBasedParserBackend"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyParser"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaParser"),
             },
-            fallback_order=["stanza", "spacy"]
+            fallback_order=["native", "stanza", "spacy"]
         )
 
         # NER
@@ -125,6 +128,22 @@ class ZomiPipeline:
                             self.backend_warnings.append(warning_msg)
                             warnings.warn(warning_msg, UserWarning, stacklevel=2)
                         return backend
+
+        # Case 3: No backend available
+        if backend and not backend.is_available():
+            error_msg = backend.get_error_message() \
+                if backend else f"{requested} backend unavailable"
+
+            # Check if it's a spaCy model issue specifically
+            if requested == "spacy" and "model" in error_msg.lower():
+                error_msg += "\n   → Fix: Run 'python -m spacy download en_core_web_sm'"
+
+            warning_msg = (
+                f"⚠️ {task.capitalize()}: Requested backend '{requested}' unavailable.\n"
+                f"   Reason: {error_msg}\n"
+                f"   Falling back to auto-selection.\n"
+                f"   📖 See: https://github.com/ZomiCommunity/zomi-nlp#installation"
+            )
 
         # Case 3: No backend available
         warning_msg = (
