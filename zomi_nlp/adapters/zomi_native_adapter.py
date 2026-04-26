@@ -1,4 +1,4 @@
-# zomi_nlp/adapters/zomi_rule_based_parser_backend.py
+# zomi_nlp/adapters/zomi_native_adapter.py
 """Adapter for ZomiRuleBasedParser native backend."""
 
 from typing import Optional
@@ -9,8 +9,8 @@ from zomi_nlp.interfaces.backends import ParserBackend
 from zomi_nlp.native import ZomiRuleBasedParser
 
 
-class ZomiRuleBasedParserBackend(ParserBackend):
-    """Backend adapter for  ZomiRuleBasedParser.
+class ZomiParser(ParserBackend):
+    """Backend adapter for ZomiParser.
 
     Mapping from parser output to ZomiToken:
     - form      → text
@@ -22,11 +22,11 @@ class ZomiRuleBasedParserBackend(ParserBackend):
 
     def __init__(self):
         self.parser = ZomiRuleBasedParser()
-        self._name: str = "zomirulebasedparser"
+        self._name: str = self.parser.__class__.__name__.lower()
         self._available: bool = True
 
     def parse(self, doc: ZomiDoc) -> ZomiDoc:
-        """Parse text using ZomiRuleBasedParser."""
+        """Parse text using ZomiParser."""
         # Annotate parser output
         result = self.parser.parse(doc.text)
 

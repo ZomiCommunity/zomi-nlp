@@ -6,7 +6,6 @@ Zomi NLP parser with no external dependencies.
 """
 
 from zomi_nlp.native.parser import (
-    ZomiParser,
     ZomiParserV362,
     ZomiRuleBasedParser,
 )
@@ -14,5 +13,4 @@ from zomi_nlp.native.parser import (
 __all__ = [
     "ZomiRuleBasedParser",
     "ZomiParserV362",
-    "ZomiParser",
 ]

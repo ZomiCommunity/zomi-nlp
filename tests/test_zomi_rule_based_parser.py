@@ -3,11 +3,11 @@
 
 import pytest
 
-from zomi_nlp.adapters.zomi_rule_based_parser_backend import (
-    ZomiRuleBasedParserBackend,
+from zomi_nlp.adapters.zomi_native_adapter import (
+    ZomiParser,
 )
 from zomi_nlp.core.doc import ZomiDoc
-from zomi_nlp.native import ZomiRuleBasedParser
+from zomi_nlp.native import ZomiRuleBasedParser, ZomiParserV362
 
 
 class TestZomiRuleBasedParser:
@@ -128,10 +128,10 @@ class TestZomiParserAliases:
 
     def test_zomi_parser_alias(self):
         """Test ZomiParser alias."""
-        from zomi_nlp.native import ZomiParser
+        from zomi_nlp.native import ZomiRuleBasedParser
 
-        assert ZomiParser is not None
-        parser = ZomiParser()
+        assert ZomiRuleBasedParser is not None
+        parser = ZomiRuleBasedParser()
         assert parser is not None
         result = parser.parse("Ka pai hi.")
         assert len(result) > 0
@@ -146,24 +146,23 @@ class TestZomiParserAliases:
         assert len(result) > 0
 
 
-class TestBackendIntegration:
+class TestAdapterIntegration:
     """Test the backend adapter integration."""
-
-    def test_backend_adapter_import(self):
-        """Test that backend adapter can be imported."""
-        backend = ZomiRuleBasedParserBackend()
-        assert backend is not None
-        assert backend.name() == "zomirulebasedparser"
-        assert backend.is_available() is True
-
-    def test_backend_parses_to_zomidoc(self):
+    def test_adapter_zomi_parser_parses_to_zomidoc(self):
         """Test that backend returns ZomiDoc."""
-        backend = ZomiRuleBasedParserBackend()
+        backend = ZomiParser()
         doc = ZomiDoc("Ka pai hi.")
         result = backend.parse(doc)
 
         assert isinstance(result, ZomiDoc)
         assert len(result.tokens) > 0
+
+    def test_adapter_zomi_parser_uses_zomi_rule_based_parser(self):
+        """Test that backend adapter can be imported."""
+        backend = ZomiParser()
+        assert backend is not None
+        assert backend.name() == "zomirulebasedparser"
+        assert backend.is_available() is True
 
 
 class TestPipelineWithNativeBackend:

@@ -279,4 +279,4 @@ sanity-check-commit: ## Show git status, unstaged diff, and staged diff
 	@git diff --cached
 
 version: ## Print current package version
-    python -c "from zomi_nlp import __version__; print(__version__)"
+	python -c "from zomi_nlp import __version__; print(__version__)"

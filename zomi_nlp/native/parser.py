@@ -369,6 +369,6 @@ class ZomiRuleBasedParser:
         print(f"✅ Success! {len(test_cases)} sentences exported to {filename}")
 
 # Aliases for compatibility
-ZomiParser = ZomiRuleBasedParser
+# ZomiParser = ZomiRuleBasedParser
 # Original development version if you want to keep the old one unchanged
 ZomiParserV362 = ZomiRuleBasedParser

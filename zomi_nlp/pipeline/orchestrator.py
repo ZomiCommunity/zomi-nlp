@@ -38,35 +38,36 @@ class ZomiPipeline:
 
     def _initialize_backends(self):
         """Initialize backends with smart fallback."""
-        # Tokenizer
+        # Tokenizer - prioritize native
         self.tokenizer = self._select_backend_with_fallback(
             task="tokenizer",
             requested=self.config.tokenizer_backend,
             backend_classes={
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiTokenizer"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyTokenizer"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaTokenizer"),
             },
-            fallback_order=["stanza", "spacy", "native"]
+            fallback_order=["native", "stanza", "spacy"]
         )
 
-        # Tagger
+        # Tagger - prioritize native
         self.tagger = self._select_backend_with_fallback(
             task="tagger",
             requested=self.config.tagger_backend,
             backend_classes={
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiTagger"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyTagger"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaTagger"),
             },
-            fallback_order=["stanza", "spacy"]
+            fallback_order=["native", "stanza", "spacy"]
         )
 
-        # Parser
+        # Parser - prioritize native
         self.parser = self._select_backend_with_fallback(
             task="parser",
             requested=self.config.parser_backend,
             backend_classes={
-                "native": ("zomi_nlp.adapters.zomi_rule_based_parser_backend",
-                           "ZomiRuleBasedParserBackend"),
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiParser"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyParser"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaParser"),
             },
