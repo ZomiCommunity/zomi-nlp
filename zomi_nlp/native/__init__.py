@@ -1,16 +1,24 @@
 # zomi_nlp/native/__init__.py
 """Zomi-native NLP components.
 
-This module contains the ZomiRuleBasedParser - a complete, rule-based
-Zomi NLP parser with no external dependencies.
+This module contains pure Python implementations of Zomi NLP components
+with no external dependencies.
 """
 
 from zomi_nlp.native.parser import (
     ZomiParserV362,
     ZomiRuleBasedParser,
 )
+from zomi_nlp.native.tokenizer import (
+    ZomiSentenceSplitter,
+    ZomiTokenizer,
+    tokenize_zomi,
+)
 
 __all__ = [
-    "ZomiRuleBasedParser",
     "ZomiParserV362",
+    "ZomiRuleBasedParser",
+    "ZomiSentenceSplitter",
+    "ZomiTokenizer",
+    "tokenize_zomi",
 ]
