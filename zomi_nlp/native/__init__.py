@@ -9,6 +9,11 @@ from zomi_nlp.native.parser import (
     ZomiParserV362,
     ZomiRuleBasedParser,
 )
+from zomi_nlp.native.tagger import (
+    ZomiPOSTagger,
+    ZomiTaggerBackend,
+    tag_zomi,
+)
 from zomi_nlp.native.tokenizer import (
     CliticSplitter,
     CompoundSplitter,
@@ -23,6 +28,7 @@ from zomi_nlp.native.tokenizer import (
 __all__ = [
     # Parser
     "ZomiParserV362",
+    "ZomiParserAdapter",
     "ZomiRuleBasedParser",
     # Tokenizer and related components
     "ZomiSentenceSplitter",
@@ -33,4 +39,8 @@ __all__ = [
     "PunctuationSplitter",
     "ReduplicationSplitter",
     "ZomiSyllableValidator",
+    # Tagger
+    "ZomiPOSTagger",
+    "ZomiTaggerBackend",
+    "tag_zomi",
 ]

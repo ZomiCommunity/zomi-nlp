@@ -55,8 +55,7 @@ class ZomiPipeline:
             task="tagger",
             requested=self.config.tagger_backend,
             backend_classes={
-                # This ZomiParserAdapter does tagging too
-                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiParserAdapter"),
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiTaggerAdapter"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyTagger"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaTagger"),
             },

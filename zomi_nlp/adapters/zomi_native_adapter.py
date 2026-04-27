@@ -5,8 +5,10 @@ from typing import Optional
 
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
-from zomi_nlp.interfaces.backends import ParserBackend, TokenizerBackend
-from zomi_nlp.native import ZomiRuleBasedParser, ZomiTokenizer
+from zomi_nlp.interfaces.backends import ParserBackend, TaggerBackend, TokenizerBackend
+from zomi_nlp.native import ZomiRuleBasedParser
+from zomi_nlp.native.tagger import ZomiTaggerBackend
+from zomi_nlp.native.tokenizer import ZomiTokenizer
 
 
 class ZomiParserAdapter(ParserBackend):
@@ -21,7 +23,7 @@ class ZomiParserAdapter(ParserBackend):
     """
 
     def __init__(self):
-        self.parser = ZomiRuleBasedParser() # This parser does tagging too
+        self.parser: ZomiRuleBasedParser = ZomiRuleBasedParser() # This parser does tagging too
         self._name: str = self.parser.__class__.__name__.lower()
         self._available: bool = True
 
@@ -66,14 +68,14 @@ class ZomiTokenizerAdapter(TokenizerBackend):
     """
 
     def __init__(self, split_clitics: bool = True, split_punct: bool = True):
-        self.tokenizer = ZomiTokenizer(
+        self.tokenizer: ZomiTokenizer = ZomiTokenizer(
             split_clitics=split_clitics,
             split_punct=split_punct
         )
         self._name: str = "zomi_tokenizer"
         self._available: bool = True
-        self.split_clitics = split_clitics
-        self.split_punct = split_punct
+        self.split_clitics: bool = split_clitics
+        self.split_punct: bool = split_punct
 
     def tokenize(self, text: str) -> list[ZomiToken]:
         """Tokenize text using native Zomi tokenizer."""
@@ -139,6 +141,29 @@ class ZomiTokenizerAdapter(TokenizerBackend):
     def get_error_message(self) -> Optional[str]:
         return None if self._available else "Native tokenizer not available"
 
+
+class ZomiTaggerAdapter(TaggerBackend):
+    """Tagger adapter using native ZomiPOSTagger."""
+
+    def __init__(self):
+        self.tagger: ZomiTaggerBackend = ZomiTaggerBackend()
+        self._name: str = "zomi_tagger"
+        self._available: bool = True
+
+    def tag(self, doc: ZomiDoc) -> ZomiDoc:
+        """Tag tokens in a ZomiDoc."""
+        return self.tagger.tag(doc)
+
+    def name(self) -> str:
+        return self._name
+
+    def is_available(self) -> bool:
+        return self._available
+
+    def get_error_message(self) -> Optional[str]:
+        return None if self._available else "Zomi tagger not available"
+
 # Alias for backward compatibility
 # ZomiNativeBackend = ZomiParseradapter
 # ZomiTokenizerBackend = ZomiTokenizerAdapter
+# ZomiTaggerBackend = ZomiTaggerAdapter
