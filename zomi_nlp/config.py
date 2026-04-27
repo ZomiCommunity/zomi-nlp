@@ -19,6 +19,8 @@ class ZomiConfig:
     parser_backend: BackendMode = "auto"
     ner_backend: BackendMode = "auto"
 
+    use_reference_parser: bool = False
+
     # Fallback settings
     fallback_enabled: bool = True
     fallback_chain: list = field(default_factory=lambda: ["stanza", "spacy", "native"])

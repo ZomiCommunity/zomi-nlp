@@ -38,35 +38,53 @@ class ZomiPipeline:
 
     def _initialize_backends(self):
         """Initialize backends with smart fallback."""
-        # Tokenizer
+        # Make same backend handle all tasks
+        if self.config.use_reference_parser:
+            from zomi_nlp.adapters.zomi_native_adapter import ZomiReferenceParserAdapter
+
+            complete = ZomiReferenceParserAdapter()
+            self.tokenizer = complete
+            self.tagger = complete
+            self.parser = complete
+            self.ner = complete
+            self.active_backends = {
+                "tokenizer": "native_reference",
+                "tagger": "native_reference",
+                "parser": "native_reference",
+                "ner": "native_reference"
+            }
+            return
+
+        # Tokenizer - prioritize native
         self.tokenizer = self._select_backend_with_fallback(
             task="tokenizer",
             requested=self.config.tokenizer_backend,
             backend_classes={
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiTokenizerAdapter"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyTokenizer"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaTokenizer"),
             },
-            fallback_order=["stanza", "spacy", "native"]
+            fallback_order=["native", "stanza", "spacy"]
         )
 
-        # Tagger
+        # Tagger - prioritize native
         self.tagger = self._select_backend_with_fallback(
             task="tagger",
             requested=self.config.tagger_backend,
             backend_classes={
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiTaggerAdapter"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyTagger"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaTagger"),
             },
-            fallback_order=["stanza", "spacy"]
+            fallback_order=["native", "stanza", "spacy"]
         )
 
-        # Parser
+        # Parser - prioritize native
         self.parser = self._select_backend_with_fallback(
             task="parser",
             requested=self.config.parser_backend,
             backend_classes={
-                "native": ("zomi_nlp.adapters.zomi_rule_based_parser_backend",
-                           "ZomiRuleBasedParserBackend"),
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiRuleBasedParserAdapter"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyParser"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaParser"),
             },
@@ -78,10 +96,11 @@ class ZomiPipeline:
             task="ner",
             requested=self.config.ner_backend,
             backend_classes={
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiNERAdapter"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyNER"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaNER"),
             },
-            fallback_order=["spacy", "stanza"]
+            fallback_order=["native", "spacy", "stanza"]
         )
 
     def _select_backend_with_fallback(
@@ -217,6 +236,14 @@ class ZomiPipeline:
                     pass
             except Exception as e:
                 logger.debug(f"Tagger failed (non-fatal): {e}")
+
+        # Lemmatization
+        if hasattr(self, 'lemmatizer') and self.lemmatizer and doc.tokens:
+            try:
+                if self.lemmatizer.is_available():
+                    doc = self.lemmatizer.tag(doc)  # Reuse tag interface
+            except Exception as e:
+                logger.debug(f"Lemmatizer failed (non-fatal): {e}")
 
         # Dependency Parsing (optional)
         if self.parser and doc.tokens:

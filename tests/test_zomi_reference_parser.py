@@ -1,22 +1,22 @@
-# zomi-nlp/tests/test_zomi_rule_based_parser.py
-"""Tests for ZomiRuleBasedParser native backend."""
+# zomi-nlp/tests/test_zomi_reference_parser.py
+"""Tests for ZomiReferenceParser native backend."""
 
 import pytest
 
-from zomi_nlp.adapters.zomi_rule_based_parser_backend import (
-    ZomiRuleBasedParserBackend,
+from zomi_nlp.adapters.zomi_native_adapter import (
+    ZomiReferenceParserAdapter,
 )
 from zomi_nlp.core.doc import ZomiDoc
-from zomi_nlp.native import ZomiRuleBasedParser
+from zomi_nlp.native._reference_parser import ZomiReferenceParser
 
 
-class TestZomiRuleBasedParser:
-    """Test suite for ZomiRuleBasedParser."""
+class TestZomiReferenceParser:
+    """Test suite for ZomiReferenceParser."""
 
     @pytest.fixture
     def parser(self):
         """Create a parser instance for testing."""
-        return ZomiRuleBasedParser()
+        return ZomiReferenceParser()
 
 
     def test_parser_initialization(self, parser):
@@ -123,47 +123,47 @@ class TestZomiRuleBasedParser:
             assert result[0]['id'] == 1
 
 
-class TestZomiParserAliases:
+class TestZomiReferenceParserAliases:
     """Test that parser aliases work correctly."""
 
-    def test_zomi_parser_alias(self):
-        """Test ZomiParser alias."""
-        from zomi_nlp.native import ZomiParser
+    def test_zomi_reference_parser_alias(self):
+        """Test ZomiReferenceParser alias."""
+        from zomi_nlp.native import ZomiReferenceParser
 
-        assert ZomiParser is not None
-        parser = ZomiParser()
+        assert ZomiReferenceParser is not None
+        parser = ZomiReferenceParser()
         assert parser is not None
         result = parser.parse("Ka pai hi.")
         assert len(result) > 0
 
-    def test_zomi_parser_v362_alias(self):
-        """Test ZomiParserV362 alias for backward compatibility."""
-        from zomi_nlp.native import ZomiParserV362
+    def test_zomi_reference_parser_v362_alias(self):
+        """Test ZomiReferenceParserV362 alias for backward compatibility."""
+        from zomi_nlp.native import ZomiReferenceParserV362
 
-        parser = ZomiParserV362()
+        parser = ZomiReferenceParserV362()
         assert parser is not None
         result = parser.parse("Ka pai hi.")
         assert len(result) > 0
 
 
-class TestBackendIntegration:
+class TestAdapterIntegration:
     """Test the backend adapter integration."""
-
-    def test_backend_adapter_import(self):
-        """Test that backend adapter can be imported."""
-        backend = ZomiRuleBasedParserBackend()
-        assert backend is not None
-        assert backend.name() == "zomirulebasedparser"
-        assert backend.is_available() is True
-
-    def test_backend_parses_to_zomidoc(self):
+    def test_adapter_zomi_reference_parser_parses_to_zomidoc(self):
         """Test that backend returns ZomiDoc."""
-        backend = ZomiRuleBasedParserBackend()
+        backend = ZomiReferenceParserAdapter()
         doc = ZomiDoc("Ka pai hi.")
         result = backend.parse(doc)
+        print(result.tokens)
 
         assert isinstance(result, ZomiDoc)
         assert len(result.tokens) > 0
+
+    def test_adapter_zomi_reference_parser_uses_zomi_reference_parser(self):
+        """Test that backend adapter can be imported."""
+        backend = ZomiReferenceParserAdapter()
+        assert backend is not None
+        assert backend.name() == "zomireferenceparser"
+        assert backend.is_available() is True
 
 
 class TestPipelineWithNativeBackend:
