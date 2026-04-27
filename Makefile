@@ -280,3 +280,6 @@ sanity-check-commit: ## Show git status, unstaged diff, and staged diff
 
 version: ## Print current package version
 	python -c "from zomi_nlp import __version__; print(__version__)"
+
+tree: ## Print project directory tree
+	tree -I "venv|.venv|__pycache__|*.egg-info|build|dist|.tox|.pytest_cache|.mypy_cache|.ruff_cache|htmlcov" -L 4
