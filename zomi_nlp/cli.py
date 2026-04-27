@@ -124,6 +124,8 @@ def main():
         print(f"Tokenizer: {nlp.tokenizer.__class__.__name__}")
         print(f"Tagger: {nlp.tagger.__class__.__name__}")
         print(f"Parser: {nlp.parser.__class__.__name__}")
+        print(f"NER: {nlp.ner.__class__.__name__}")
+        print("\nProcessing text...\n")
         doc = nlp(args.text)
         for token in doc:
             print(f"{token.text}\
