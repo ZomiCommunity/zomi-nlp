@@ -4,7 +4,7 @@
 import pytest
 
 from zomi_nlp.adapters.zomi_native_adapter import (
-    ZomiParser,
+    ZomiParserAdapter,
 )
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.native import ZomiRuleBasedParser, ZomiParserV362
@@ -150,7 +150,7 @@ class TestAdapterIntegration:
     """Test the backend adapter integration."""
     def test_adapter_zomi_parser_parses_to_zomidoc(self):
         """Test that backend returns ZomiDoc."""
-        backend = ZomiParser()
+        backend = ZomiParserAdapter()
         doc = ZomiDoc("Ka pai hi.")
         result = backend.parse(doc)
 
@@ -159,7 +159,7 @@ class TestAdapterIntegration:
 
     def test_adapter_zomi_parser_uses_zomi_rule_based_parser(self):
         """Test that backend adapter can be imported."""
-        backend = ZomiParser()
+        backend = ZomiParserAdapter()
         assert backend is not None
         assert backend.name() == "zomirulebasedparser"
         assert backend.is_available() is True

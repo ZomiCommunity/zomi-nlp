@@ -10,15 +10,27 @@ from zomi_nlp.native.parser import (
     ZomiRuleBasedParser,
 )
 from zomi_nlp.native.tokenizer import (
+    CliticSplitter,
+    CompoundSplitter,
+    PunctuationSplitter,
+    ReduplicationSplitter,
     ZomiSentenceSplitter,
+    ZomiSyllableValidator,
     ZomiTokenizer,
     tokenize_zomi,
 )
 
 __all__ = [
+    # Parser
     "ZomiParserV362",
     "ZomiRuleBasedParser",
+    # Tokenizer and related components
     "ZomiSentenceSplitter",
     "ZomiTokenizer",
     "tokenize_zomi",
+    "CliticSplitter",
+    "CompoundSplitter",
+    "PunctuationSplitter",
+    "ReduplicationSplitter",
+    "ZomiSyllableValidator",
 ]

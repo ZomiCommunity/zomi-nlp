@@ -1,15 +1,15 @@
 # zomi_nlp/adapters/zomi_native_adapter.py
-"""Adapter for ZomiRuleBasedParser native backend."""
+"""Adapter for Zomi native backends."""
 
 from typing import Optional
 
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
-from zomi_nlp.interfaces.backends import ParserBackend
-from zomi_nlp.native import ZomiRuleBasedParser
+from zomi_nlp.interfaces.backends import ParserBackend, TokenizerBackend
+from zomi_nlp.native import ZomiRuleBasedParser, ZomiTokenizer
 
 
-class ZomiParser(ParserBackend):
+class ZomiParserAdapter(ParserBackend):
     """Backend adapter for ZomiParser.
 
     Mapping from parser output to ZomiToken:
@@ -21,7 +21,7 @@ class ZomiParser(ParserBackend):
     """
 
     def __init__(self):
-        self.parser = ZomiRuleBasedParser()
+        self.parser = ZomiRuleBasedParser() # This parser does tagging too
         self._name: str = self.parser.__class__.__name__.lower()
         self._available: bool = True
 
@@ -54,3 +54,91 @@ class ZomiParser(ParserBackend):
 
     def get_error_message(self) -> Optional[str]:
         return None if self._available else "ZomiParser not available"
+
+
+class ZomiTokenizerAdapter(TokenizerBackend):
+    """Tokenizer adapter using native ZomiTokenizer.
+
+    Mapping from tokenizer output to ZomiToken:
+    - token text → text
+    - start_char → start_char
+    - end_char → end_char
+    """
+
+    def __init__(self, split_clitics: bool = True, split_punct: bool = True):
+        self.tokenizer = ZomiTokenizer(
+            split_clitics=split_clitics,
+            split_punct=split_punct
+        )
+        self._name: str = "zomi_tokenizer"
+        self._available: bool = True
+        self.split_clitics = split_clitics
+        self.split_punct = split_punct
+
+    def tokenize(self, text: str) -> list[ZomiToken]:
+        """Tokenize text using native Zomi tokenizer."""
+        if not text:
+            return []
+
+        # Get tokens with spans
+        token_spans = self.tokenizer.tokenize_with_spans(text)
+
+        # Convert to ZomiTokens
+        zomi_tokens = []
+        for idx, (token_text, start, end) in enumerate(token_spans):
+            token = ZomiToken(
+                text=token_text,
+                start_char=start,
+                end_char=end,
+                idx=idx,
+                # Tokenizer doesn't provide linguistic annotations yet
+                pos_=None,
+                lemma_=None,
+                dep_=None,
+                head=-1,
+            )
+
+            # Zomi-specific flags
+            token.is_clitic = self._is_clitic(token_text)
+            token.clitic_type = self._get_clitic_type(token_text) if token.is_clitic else None
+
+            zomi_tokens.append(token)
+
+        return zomi_tokens
+
+    def _is_clitic(self, token: str) -> bool:
+        """Check if token is a known Zomi clitic."""
+        from zomi_nlp.native.tokenizer import CliticSplitter
+        # Clitics are the ones that would be split off
+        clitic_splitter = CliticSplitter()
+        # If token is in clitic list, it's a clitic
+        return token.lower() in clitic_splitter.sorted_clitics
+
+    def _get_clitic_type(self, token: str) -> Optional[str]:
+        """Get clitic type."""
+        clitic_map = {
+            "ve": "polite", "veh": "polite",
+            "ta": "emphatic", "tae": "emphatic",
+            "hiam": "question", "maw": "question",
+            "le": "conditional", "leh": "conditional",
+            "pah": "temporal", "sawn": "temporal",
+            "ngei": "perfective", "khin": "perfective",
+            "kei": "negative", "loin": "negative",
+            "hen": "imperative",
+            "uh": "plural",
+            "hi": "copular",
+        }
+        return clitic_map.get(token.lower())
+
+    def name(self) -> str:
+        return self._name
+
+    def is_available(self) -> bool:
+        return self._available
+
+    def get_error_message(self) -> Optional[str]:
+        return None if self._available else "Native tokenizer not available"
+
+# Alias for backward compatibility
+# ZomiNativeBackend = ZomiParseradapter
+# ZomiTokenizerBackend = ZomiTokenizerAdapter
