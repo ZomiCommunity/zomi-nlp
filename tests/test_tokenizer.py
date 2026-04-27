@@ -1,9 +1,15 @@
 """Tests for Zomi tokenizer."""
 
 import pytest
+
 from zomi_nlp.native.tokenizer import (
-    ZomiTokenizer, ZomiSentenceSplitter, tokenize_zomi,
-    CliticSplitter, PunctuationSplitter, ReduplicationSplitter, CompoundSplitter
+    CliticSplitter,
+    CompoundSplitter,
+    PunctuationSplitter,
+    ReduplicationSplitter,
+    ZomiSentenceSplitter,
+    ZomiTokenizer,
+    tokenize_zomi,
 )
 
 

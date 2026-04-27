@@ -2,7 +2,10 @@
 """Zomi NLP - Natural Language Processing for Zomi Language."""
 
 from zomi_nlp.config import ZomiConfig
-from zomi_nlp.native import ZomiParserV362, ZomiRuleBasedParser  # Expose native parser
+from zomi_nlp.native._reference_parser import (
+    ZomiReferenceParser,
+    ZomiReferenceParserV362,
+)
 from zomi_nlp.pipeline.orchestrator import ZomiPipeline
 from zomi_nlp.utils.installation import (  # Import convenience utilities
     auto_install_recommended,
@@ -26,8 +29,9 @@ __all__ = [
     "get_installation_advice",
     "check_spacy_model",
     "auto_install_recommended",
-    "ZomiParserV362",
     "ZomiRuleBasedParser",
+    "ZomiReferenceParserV362",
+    "ZomiReferenceParser"
 ]
 
 

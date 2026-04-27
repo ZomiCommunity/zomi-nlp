@@ -1,6 +1,7 @@
 """Tests for Zomi NER."""
 
 import pytest
+
 from zomi_nlp.native.ner import ZomiNER, extract_entities_zomi
 
 

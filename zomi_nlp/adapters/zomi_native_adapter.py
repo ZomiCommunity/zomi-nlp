@@ -6,35 +6,86 @@ from typing import Optional
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
 from zomi_nlp.interfaces.backends import NERBackend, ParserBackend, TaggerBackend, TokenizerBackend
-from zomi_nlp.native import ZomiRuleBasedParser
+from zomi_nlp.native._reference_parser import ZomiReferenceParser
 from zomi_nlp.native.lemmatizer import ZomiLemmatizerBackend
 from zomi_nlp.native.ner import ZomiNER
 from zomi_nlp.native.tagger import ZomiTaggerBackend
 from zomi_nlp.native.tokenizer import ZomiTokenizer
 
 
-class ZomiParserAdapter(ParserBackend):
-    """Backend adapter for ZomiParser.
+class ZomiReferenceParserAdapter(TokenizerBackend, TaggerBackend, ParserBackend):
+    """Single adapter that handles everything using ZomiReferenceParser.
 
-    Mapping from parser output to ZomiToken:
-    - form      → text
-    - lemma     → lemma_
-    - tag       → pos_
-    - deprel    → dep_
-    - head      → head
+    Original complete parser.
     """
 
     def __init__(self) -> None:
-        self.parser: ZomiRuleBasedParser = ZomiRuleBasedParser() # This parser does tagging too
-        self._name: str = self.parser.__class__.__name__.lower()
+        self.parser = ZomiReferenceParser()
+        self._name: str = "zomireferenceparser"
+        self._available: bool = True
+
+    def tokenize(self, text: str) -> list[ZomiToken]:
+        result = self.parser.parse(text)
+        # Return only tokens
+        return [ZomiToken(text=r['form'], start_char=0, end_char=0, idx=i)
+                for i, r in enumerate(result)]
+
+    def tag(self, doc: ZomiDoc) -> ZomiDoc:
+        result = self.parser.parse(doc.text)
+        # Annotate existing tokens with POS tags
+        for i, r in enumerate(result):
+            if i < len(doc.tokens):
+                doc.tokens[i].pos_ = r['tag']
+        return doc
+
+    def parse(self, doc: ZomiDoc) -> ZomiDoc:
+        """Parse text using ZomiReferenceParser."""
+        # Get parsed data (list of dicts)
+        parsed_data = self.parser.parse(doc.text)
+
+        # Clear existing tokens (in case any were added)
+        doc.tokens = []
+
+        # Convert each token dict to ZomiToken
+        for token_data in parsed_data:
+            token = ZomiToken(
+                text=token_data.get('form', ''),
+                start_char=0,
+                end_char=0,
+                idx=len(doc.tokens),
+                lemma_=token_data.get('lemma', ''),
+                pos_=token_data.get('tag', ''),
+                dep_=token_data.get('deprel', ''),
+                head=token_data.get('head', 0),
+            )
+            doc.tokens.append(token)
+
+        return doc
+
+    def name(self) -> str:
+        return self._name
+
+    def is_available(self) -> bool:
+        return self._available
+
+    def get_error_message(self) -> Optional[str]:
+        return None if self._available else "ZomiReferenceParser not available"
+
+
+class ZomiRuleBasedParserAdapter(ParserBackend):
+    """Backend adapter for complete ZomiRuleBasedParser."""
+
+    def __init__(self) -> None:
+        from zomi_nlp.native.parser import ZomiRuleBasedParser
+        self.parser = ZomiRuleBasedParser()
+        self._name: str = "zomi_rule_based_parser"
         self._available: bool = True
 
     def parse(self, doc: ZomiDoc) -> ZomiDoc:
-        """Parse text using ZomiParser."""
-        # Annotate parser output
+        """Parse text using complete ZomiRuleBasedParser."""
         result = self.parser.parse(doc.text)
 
-        # Convert to ZomiDoc tokens
+        doc.tokens = []
         for token_data in result:
             token = ZomiToken(
                 text=token_data.get('form', ''),
@@ -57,7 +108,7 @@ class ZomiParserAdapter(ParserBackend):
         return self._available
 
     def get_error_message(self) -> Optional[str]:
-        return None if self._available else "ZomiParser not available"
+        return None if self._available else "ZomiRuleBasedParser not available"
 
 
 class ZomiTokenizerAdapter(TokenizerBackend):

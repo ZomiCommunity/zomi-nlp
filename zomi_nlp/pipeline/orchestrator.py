@@ -38,6 +38,23 @@ class ZomiPipeline:
 
     def _initialize_backends(self):
         """Initialize backends with smart fallback."""
+        # Make same backend handle all tasks
+        if self.config.use_reference_parser:
+            from zomi_nlp.adapters.zomi_native_adapter import ZomiReferenceParserAdapter
+
+            complete = ZomiReferenceParserAdapter()
+            self.tokenizer = complete
+            self.tagger = complete
+            self.parser = complete
+            self.ner = complete
+            self.active_backends = {
+                "tokenizer": "native_reference",
+                "tagger": "native_reference",
+                "parser": "native_reference",
+                "ner": "native_reference"
+            }
+            return
+
         # Tokenizer - prioritize native
         self.tokenizer = self._select_backend_with_fallback(
             task="tokenizer",
@@ -67,7 +84,7 @@ class ZomiPipeline:
             task="parser",
             requested=self.config.parser_backend,
             backend_classes={
-                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiParserAdapter"),
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiRuleBasedParserAdapter"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyParser"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaParser"),
             },

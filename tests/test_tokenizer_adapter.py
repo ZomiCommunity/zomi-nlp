@@ -1,8 +1,8 @@
 """Tests for native tokenizer adapter."""
 
 import pytest
+
 from zomi_nlp.adapters.zomi_native_adapter import ZomiTokenizerAdapter
-from zomi_nlp.core.doc import ZomiDoc
 
 
 class TestZomiTokenizerAdapter:

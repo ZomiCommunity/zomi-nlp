@@ -1,6 +1,7 @@
 """Tests for Zomi native POS tagger."""
 
 import pytest
+
 from zomi_nlp.native.tagger import ZomiPOSTagger, ZomiTaggerBackend, tag_zomi
 from zomi_nlp.native.tokenizer import ZomiTokenizer
 

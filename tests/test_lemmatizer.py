@@ -1,11 +1,12 @@
 """Tests for Zomi native lemmatizer."""
 
 import pytest
+
 from zomi_nlp.native.lemmatizer import (
     ZomiLemmatizer,
     ZomiLemmatizerBackend,
-    lemmatize_zomi,
     lemmatize_with_info_zomi,
+    lemmatize_zomi,
 )
 from zomi_nlp.native.tokenizer import ZomiTokenizer
 
