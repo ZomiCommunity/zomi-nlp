@@ -4,7 +4,7 @@
 from typing import Optional
 
 from zomi_nlp.core.doc import ZomiDoc
-from zomi_nlp.native.lexicons import ZOMI_LEXICON, ZOMI_SUFFIXES
+from zomi_nlp.native.lexicons import ZOMI_LEXICON, ZOMI_PREFIXES, ZOMI_SUFFIXES
 from zomi_nlp.native.tokenizer import ZomiTokenizer
 
 
@@ -39,7 +39,8 @@ class ZomiPOSTagger:
             tokenizer: Optional tokenizer instance. If not provided, creates new one.
         """
         self.lexicon: dict[str, dict[str, str]] = ZOMI_LEXICON.copy()
-        self.suffix_table: dict[str, dict[str, str]] = ZOMI_SUFFIXES.copy()
+        self.suffix_table: dict[str, dict[str, str]] = ZOMI_SUFFIXES.copy() # type: ignore
+        self.prefix_table: dict[str, dict[str, str]] = ZOMI_PREFIXES.copy() # type: ignore
         self.tokenizer: ZomiTokenizer = tokenizer or ZomiTokenizer()
 
     def tag(self, tokens: list[str]) -> list[tuple[str, str, Optional[str]]]:
@@ -70,26 +71,31 @@ class ZomiPOSTagger:
             entry = self.lexicon[token_lower]
             return entry.get('upos', self.DEFAULT_TAG), entry.get('feats')
 
-        # 2. Check suffix table (particles, auxiliaries)
+        # 2. Check prefix table (pronouns, directional markers)
+        if token_lower in self.prefix_table:
+            entry = self.prefix_table[token_lower]
+            return entry.get('upos', 'PRON'), entry.get('feats')
+
+        # 3. Check suffix table (particles, auxiliaries)
         if token_lower in self.suffix_table:
             entry = self.suffix_table[token_lower]
             return entry.get('upos', 'PART'), entry.get('feats')
 
-        # 3. Apply pattern heuristics
+        # 4. Apply pattern heuristics
         for pattern, tag in self.PATTERN_RULES:
             import re
             if re.match(pattern, token):
                 return tag, None
 
-        # 4. Check for numbers
+        # 5. Check for numbers
         if token.isdigit():
             return "NUM", "NumType=Card"
 
-        # 5. Check for punctuation
+        # 6. Check for punctuation
         if token in ".,!?;:()[]{}'\"":
             return "PUNCT", None
 
-        # 6. Default fallback
+        # 7. Default fallback
         return self.DEFAULT_TAG, None
 
     def tag_with_context(self, tokens: list[str]) -> list[tuple[str, str, Optional[str]]]:

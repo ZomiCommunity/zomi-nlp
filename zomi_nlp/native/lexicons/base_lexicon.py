@@ -1,6 +1,134 @@
 # zomi_nlp/native/lexicons/base_lexicon.py
 """Zomi base lexicon - 600+ entries with POS tags and features."""
 
+from functools import lru_cache
+
+# ============================================================
+# MORPHOLOGICAL DATA (Prefixes, Suffixes)
+# ============================================================
+
+# Zomi prefixes and their features
+ZOMI_PREFIXES = {
+    "ka": {"lemma": "ka", "upos": "PRON", "type": "prefix", "gloss": "1SG",
+           "feats": "Person=1|Number=Sing", "deprel": "nsubj"},
+    "ke": {"lemma": "ke", "upos": "PRON", "type": "prefix", "gloss": "1SG",
+           "feats": "Person=1|Number=Sing", "deprel": "nsubj"},
+    "na": {"lemma": "na", "upos": "PRON", "type": "prefix", "gloss": "2SG",
+           "feats": "Person=2|Number=Sing", "deprel": "nsubj"},
+    "nang": {"lemma": "nang", "upos": "PRON", "type": "prefix", "gloss": "2SG",
+             "feats": "Person=2|Number=Sing", "deprel": "nsubj"},
+    "a": {"lemma": "a","upos": "PRON", 	"type":"prefix", 	"gloss":"3SG",
+          "feats":"Person=3|Number=Sing", "deprel": "nsubj"},
+    "i": {"lemma": "i", "upos": "PRON", "type": "prefix","gloss": "1PL",
+          "feats": "Person=1|Number=Plur", "deprel": "nsubj"},
+    "nin": {"lemma": "nin", "upos": "PRON", "type": "prefix", "gloss": "1PL",
+            "feats": "Person=1|Number=Plur", "deprel": "nsubj"},
+    "hong": {"lemma": "hong", "upos": "PRON", "type": "prefix", "gloss": "DIR",
+             "feats": "Directional=Yes", "deprel": "expl"},
+    "pai": {"lemma": "pai", "upos": "PRON", "type": "prefix", "gloss": "PL",
+            "feats": "Number=Plur", "deprel": "nsubj"},
+    "ih": {"lemma": "ih", "upos": "PRON", "type": "prefix", "gloss": "1PL",
+           "feats": "Person=1|Number=Plur", "deprel": "nsubj"},
+}
+
+# Zomi suffixes/particles and their features
+ZOMI_SUFFIXES = {
+    "ve": {"lemma": "ve", "upos": "PART", "type": "suffix", "gloss": "POL",
+           "feats": "Mood=Ind|Polite=Yes", "deprel": "discourse"},
+    "veh": {"lemma": "veh", "upos": "PART", "type": "suffix", "gloss": "POL",
+            "feats": "Mood=Ind|Polite=Yes", "deprel": "discourse"},
+    "ta": {"lemma": "ta", "upos": "PART", "type": "suffix", "gloss": "EMPH",
+           "feats": "Emphatic=Yes", "deprel": "discourse"},
+    "tae": {"lemma": "tae", "upos": "PART", "type": "suffix", "gloss": "EMPH",
+            "feats": "Emphatic=Yes", "deprel": "discourse"},
+    "hiam": {"lemma": "hiam","upos": "PART", 	"type":"suffix", 	"gloss":"Q",
+             "feats":"PartType=Int", "deprel": "discourse"},
+    "maw": {"lemma": "maw", "upos": "PART", "type": "suffix", "gloss": "Q",
+            "feats": "PartType=Int", "deprel": "discourse"},
+    "le": {"lemma": "le", "upos": "PART", "type": "suffix", "gloss": "COND",
+           "feats": "Conditional=Yes", "deprel": "discourse"},
+    "leh": {"lemma": "leh", "upos": "PART", "type": "suffix", "gloss": "COND",
+            "feats": "Conditional=Yes", "deprel": "discourse"},
+    "pah": {"lemma": "pah", "upos": "PART","type": "suffix", "gloss":"TEMP",
+            "feats":"Temporal=Yes", "deprel": "discourse"},
+    "sawn": {"lemma": "sawn","upos": "PART", "type" : "suffix",	"gloss":"TEMP",
+             "feats": "Temporal=Yes", "deprel": "discourse"},
+    "ngei": {"lemma": "ngei", "upos":"PART", "type":"suffix", "gloss":"PERF",
+             "feats":"Aspect=Perf", "deprel": "discourse"},
+    "khin": {"lemma": "khin","upos": "PART", "type":"suffix", "gloss":"PERF",
+             "feats": "Aspect=Perf", "deprel": "discourse"},
+   "kei": {"lemma":"kei", "upos": "PART", "type": "suffix", "gloss":"NEG",
+           "feats":"Polarity=Neg", "deprel": "discourse"},
+   "loin": {"lemma":"loin", "upos": "PART", "type": "suffix", "gloss":"NEG",
+            "feats":"Polarity=Neg", "deprel": "discourse"},
+   "hen": {"lemma":"hen", "upos": "PART", "type": "suffix", "gloss":"IMP",
+           "feats":"Mood=Imp", "deprel": "discourse"},
+   "uh": {"lemma":"uh", "upos": "PART", "type": "suffix", 	"gloss":"PL",
+          "feats":"Number=Plur", "deprel": "clf"},
+   "hi": {"lemma": "hi", "upos": "PART", "type": "suffix", "gloss": "COP",
+          "feats": "Copula=Yes", "deprel": "cop"},
+}
+
+# ============================================================
+# DETAILED VERSIONS FOR MORPHOLOGY (with features dict)
+# ============================================================
+
+@lru_cache(maxsize=10000)  # Cache up to 10,000 unique feature strings
+def parse_feats_string(feats_str: str) -> tuple[tuple[str, str], ...]:
+    """Parse feature string to immutable tuple for caching.
+
+    Returns tuple of (key, value) pairs for hashability.
+    """
+    if not feats_str or feats_str == "_":
+        return ()
+
+    result = []
+    for pair in feats_str.split('|'):
+        if '=' in pair:
+            key, value = pair.split('=', 1)
+            result.append((key, value))
+        else:
+            result.append((pair, "Yes"))
+
+    return tuple(result)
+
+
+def get_features_dict(feats_str: str) -> dict[str, str]:
+    """Get features as dictionary (from cached tuple)."""
+    return dict(parse_feats_string(feats_str))
+
+
+def format_feats_dict(feats_dict: dict[str, str]) -> str:
+    """Convert features dict back to UD-style string."""
+    if not feats_dict:
+        return "_"
+
+    pairs = []
+    for key, value in feats_dict.items():
+        if value == "Yes":
+            pairs.append(key)
+        else:
+            pairs.append(f"{key}={value}")
+
+    return "|".join(pairs)
+
+
+# For direct string-to-string conversion (most common case)
+@lru_cache(maxsize=10000)
+def normalize_feats_string(feats_str: str) -> str:
+    """Normalize feature string (sort keys, consistent formatting)."""
+    if not feats_str or feats_str == "_":
+        return "_"
+
+    features = dict(parse_feats_string(feats_str))
+    # Sort for consistent output
+    sorted_items = sorted(features.items())
+    pairs = [f"{k}={v}" if v != "Yes" else k for k, v in sorted_items]
+    return "|".join(pairs)
+
+# ============================================================
+# MAIN LEXICON
+# ============================================================
 ZOMI_LEXICON = {
     # Nouns
     "pasian": {"lemma": "pasian", "upos": "NOUN", "feats": "Number=Sing|Proper=Yes"},
@@ -16,16 +144,22 @@ ZOMI_LEXICON = {
     "sangnaupangte": {"lemma": "sangnaupangte", "upos": "NOUN", "feats": "Number=Plur"},
 
     # Pronouns
-    "eite": {"lemma": "eite", "upos": "PRON", "feats": "Number=Plur|Person=1"},
+    "ka": {"lemma": "ka", "upos": "PRON", "feats": "Number=Sing|Person=1|PronType=Prs",
+           "deprel": "nsubj"},
     "ih": {"lemma": "ih", "upos": "PRON", "feats": "Number=Plur|Person=1|PronType=Prs"},
-    "ka": {"lemma": "ka", "upos": "PRON", "feats": "Number=Sing|Person=1|PronType=Prs"},
     "na": {"lemma": "na", "upos": "PRON", "feats": "Number=Sing|Person=2|PronType=Prs"},
-    "amah": {"lemma": "amah", "upos": "PRON", "feats": "Number=Sing|Person=3"},
+    "nang": {"lemma": "nang", "upos": "PRON", "feats": "Number=Sing|Person=2|PronType=Prs"},
     "kua": {"lemma": "kua", "upos": "PRON", "feats": "PronType=Int"},
+    "a": {"lemma": "a", "upos": "PRON", "feats": "Number=Sing|Person=3|PronType=Prs"},
+    "i": {"lemma": "i", "upos": "PRON", "feats": "Number=Plur|Person=1|PronType=Prs"},
+    "amaute": {"lemma": "amaute", "upos": "PRON", "feats": "Number=Plur|Person=3|PronType=Prs"},
+    "kote" : {"lemma": "kote", "upos": "PRON", "feats": "Number=Plur|Person=3|PronType=Prs"},
+    "eite": {"lemma": "eite", "upos": "PRON", "feats": "Number=Plur|Person=1"},
+    "amah": {"lemma": "amah", "upos": "PRON", "feats": "Number=Sing|Person=3"},
 
     # Verbs
     "ne": {"lemma": "ne", "upos": "VERB", "feats": "VerbForm=Fin"},
-    "pai": {"lemma": "pai", "upos": "VERB", "feats": "VerbForm=Fin"},
+    "pai": {"lemma": "pai", "upos": "VERB", "feats": "VerbForm=Fin", "deprel": "root"},
     "pia": {"lemma": "pia", "upos": "VERB", "feats": "VerbForm=Fin"},
     "piang": {"lemma": "piang", "upos": "VERB", "feats": "VerbForm=Fin"},
     "piangsak": {"lemma": "piangsak", "upos": "VERB", "feats": "Voice=Cau|VerbForm=Fin"},
@@ -46,25 +180,7 @@ ZOMI_LEXICON = {
     "pah": {"lemma": "pah", "upos": "ADV", "feats": "Aspect=Perf", "deprel": "advmod"},
 
     "pen": {"lemma": "pen", "upos": "PART", "feats": "Topic=Yes", "deprel": "discourse"},
+    "cin": {"lemma": "cin", "upos": "PART", "feats": "Topic=Yes", "deprel": "discourse"},
+    "te": {"lemma": "te", "upos": "PART", "feats": "Topic=Yes", "deprel": "discourse"},
 }
 
-# Suffix/Particle Table
-ZOMI_SUFFIXES = {
-    "ve": {"lemma": "ve", "upos": "PART", "feats": "Mood=Ind|Polite=Yes", "deprel": "discourse"},
-    "maw": {"lemma": "maw", "upos": "PART", "feats": "PartType=Int|Mood=Des",
-            "deprel": "discourse"},
-    "tawh": {"lemma": "tawh", "upos": "ADP", "feats": "Case=Com", "deprel": "case"},
-    "in": {"lemma": "in", "upos": "ADP", "feats": "Case=Erg", "deprel": "case"},
-    "hehpihna": {"lemma": "hehpihna", "upos": "NOUN", "feats": "Number=Sing"},
-    "ii": {"lemma": "ii", "upos": "PART", "feats": "PartType=Int", "deprel": "discourse"},
-    "hi": {"lemma": "hi", "upos": "PART", "feats": "_", "deprel": "discourse"},
-    "hikei": {"lemma": "hikei", "upos": "AUX", "feats": "Polarity=Neg|VerbForm=Fin",
-              "deprel": "cop"},
-    "ahi": {"lemma": "ahi", "upos": "AUX", "feats": "VerbForm=Fin", "deprel": "cop"},
-    "sa": {"lemma": "sa", "upos": "AUX", "feats": "Tense=Past", "deprel": "aux"},
-    "uh": {"lemma": "uh", "upos": "PART", "feats": "Number=Plur", "deprel": "clf"},
-    "laitak": {"lemma": "laitak", "upos": "PART", "feats": "Aspect=Prog", "deprel": "aux"},
-    "ngei": {"lemma": "ngei", "upos": "PART", "feats": "Aspect=Perf", "deprel": "advmod"},
-    "khin": {"lemma": "khin", "upos": "PART", "feats": "Aspect=Perf", "deprel": "aux"},
-    "hiam": {"lemma": "hiam", "upos": "PART", "feats": "PartType=Int", "deprel": "discourse"},
-}

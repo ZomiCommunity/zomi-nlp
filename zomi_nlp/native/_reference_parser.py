@@ -43,6 +43,7 @@ class ZomiReferenceParser:
             return t, d['upos'], d['feats'], d.get('deprel', 'dep')
         if t in self.suffix_table:
             d = self.suffix_table[t]
+            print(d)
             return t, d['upos'], d['feats'], d['deprel']
 
         # Handle 'ci-a' and other complex forms

@@ -15,6 +15,7 @@ from zomi_nlp.native.lemmatizer import (
     lemmatize_with_info_zomi,
     lemmatize_zomi,
 )
+from zomi_nlp.native.morphology import ZomiMorphologicalAnalyzer, analyze_morphology
 from zomi_nlp.native.ner import ZomiNER, ZomiNERBackend, extract_entities_zomi
 from zomi_nlp.native.tagger import (
     ZomiPOSTagger,
@@ -58,6 +59,9 @@ __all__ = [
     "ZomiNER",
     "ZomiNERBackend",
     "extract_entities_zomi",
+    # Morphological Analyzer
+    "ZomiMorphologicalAnalyzer",
+    "analyze_morphology",
     # Complete Parser (deprecated for modular use)
     "ZomiReferenceParser",
     "ZomiReferenceParserV362",

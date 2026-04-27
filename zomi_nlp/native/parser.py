@@ -9,7 +9,7 @@ from zomi_nlp.native.tokenizer import ZomiTokenizer
 class ZomiRuleBasedParser:
     """Complete pipeline using modular components."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.dependency_parser = ZomiDependencyParser()
         self.tokenizer = ZomiTokenizer()
         self.tagger = ZomiPOSTagger()  # Fixed typo

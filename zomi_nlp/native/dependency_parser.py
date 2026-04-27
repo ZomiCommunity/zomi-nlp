@@ -81,7 +81,7 @@ class ZomiDependencyParser:
         """Initialize dependency parser."""
         self._reset_state()
 
-    def _reset_state(self):
+    def _reset_state(self) -> None:
         """Reset internal state for new parse."""
         self.tokens: list[dict] = []
         self.heads: list[int] = []
