@@ -238,29 +238,110 @@ tag: ## Create and push a git tag based on the current version in pyproject.toml
 # Auto-generate CHANGELOG
 # -----------------------------
 
+# In Makefile, replace your changelog target with:
+
+.PHONY: changelog
 changelog: ## Generate CHANGELOG.md entry from git history since last tag
 	@echo "$(BLUE)Generating changelog entry...$(NC)"
-	@version=$$(grep '^version' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/'); \
-	if grep -q "## $$version" CHANGELOG.md; then \
+	@# Get the latest tag
+	@latest_tag=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
+	previous_tag=$$(git describe --tags --abbrev=0 $$latest_tag^ 2>/dev/null || echo ""); \
+	version=$$(echo $$latest_tag | sed 's/^v//'); \
+	\
+	if grep -q "## \[$$version\]" CHANGELOG.md; then \
 		echo "$(YELLOW)Changelog for version $$version already exists.$(NC)"; \
 		exit 1; \
 	fi; \
-	echo "Creating changelog for version $$version"; \
-	previous_tag=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
-	if [ -z "$$previous_tag" ]; then \
-		echo "$(YELLOW)No previous tag found — using full commit history.$(NC)"; \
-		git_log=$$(git log --pretty=format:"- %s"); \
-	else \
-		echo "Comparing commits since $$previous_tag"; \
-		git_log=$$(git log $$previous_tag..HEAD --pretty=format:"- %s"); \
-	fi; \
+	\
+	echo "Creating changelog for version $$version (since $$previous_tag)"; \
+	\
+	# Categorize commits
+	feats=$$(git log $$previous_tag..$$latest_tag --pretty=format:"- %s" | grep -E '^(feat|feature|add|new)' || echo ""); \
+	fixes=$$(git log $$previous_tag..$$latest_tag --pretty=format:"- %s" | grep -E '^(fix|bug|resolve|correct)' || echo ""); \
+	docs=$$(git log $$previous_tag..$$latest_tag --pretty=format:"- %s" | grep -E '^(docs|doc|readme)' || echo ""); \
+	refactor=$$(git log $$previous_tag..$$latest_tag --pretty=format:"- %s" | grep -E '^(refactor|clean|rename|move)' || echo ""); \
+	tests=$$(git log $$previous_tag..$$latest_tag --pretty=format:"- %s" | grep -E '^(test|spec)' || echo ""); \
+	ci=$$(git log $$previous_tag..$$latest_tag --pretty=format:"- %s" | grep -E '^(ci|cd|action|workflow)' || echo ""); \
+	\
+	# Insert at top of CHANGELOG.md
 	{ \
-		echo "## $$version — $$(date +%Y-%m-%d)"; \
+		echo "## [$$version] — $$(date +%Y-%m-%d)"; \
 		echo ""; \
-		echo "$$git_log"; \
+		if [ -n "$$feats" ]; then \
+			echo "### ✨ New Features"; \
+			echo "$$feats"; \
+			echo ""; \
+		fi; \
+		if [ -n "$$fixes" ]; then \
+			echo "### 🐛 Bug Fixes"; \
+			echo "$$fixes"; \
+			echo ""; \
+		fi; \
+		if [ -n "$$docs" ]; then \
+			echo "### 📚 Documentation"; \
+			echo "$$docs"; \
+			echo ""; \
+		fi; \
+		if [ -n "$$refactor" ]; then \
+			echo "### 🔧 Refactoring"; \
+			echo "$$refactor"; \
+			echo ""; \
+		fi; \
+		if [ -n "$$tests" ]; then \
+			echo "### ✅ Tests"; \
+			echo "$$tests"; \
+			echo ""; \
+		fi; \
+		if [ -n "$$ci" ]; then \
+			echo "### ⚙️ CI/CD"; \
+			echo "$$ci"; \
+			echo ""; \
+		fi; \
+		if [ -z "$$feats$$fixes$$docs$$refactor$$tests$$ci" ]; then \
+			echo "### 📦 Other Changes"; \
+			git log $$previous_tag..$$latest_tag --pretty=format:"- %s" || echo ""; \
+			echo ""; \
+		fi; \
+		echo "---"; \
 		echo ""; \
-	} >> CHANGELOG.md; \
+		cat CHANGELOG.md; \
+	} > CHANGELOG.new && mv CHANGELOG.new CHANGELOG.md; \
 	echo "$(GREEN)✓ Changelog updated for version $$version$(NC)"
+
+.PHONY: changelog-full
+changelog-full: ## Generate full changelog from all tags
+	@echo "$(BLUE)Generating full changelog from all tags...$(NC)"
+	@> CHANGELOG.md
+	@echo "# Changelog" > CHANGELOG.md
+	@echo "" >> CHANGELOG.md
+	@echo "All notable changes to this project will be documented in this file." >> CHANGELOG.md
+	@echo "" >> CHANGELOG.md
+	@echo "The format is based on [Keep a Changelog](https://keepachangelog.com/)." >> CHANGELOG.md
+	@echo "" >> CHANGELOG.md
+	@tags=$$(git tag -l | sort -V -r); \
+	prev=""; \
+	for tag in $$tags; do \
+		if [ -n "$$prev" ]; then \
+			version=$$(echo $$tag | sed 's/^v//'); \
+			echo "## [$$version] — $$(git log -1 --format=%ad --date=short $$tag)" >> CHANGELOG.md; \
+			echo "" >> CHANGELOG.md; \
+			echo "### 📦 Changes" >> CHANGELOG.md; \
+			git log $$tag..$$prev --pretty=format:"- %s" >> CHANGELOG.md; \
+			echo "" >> CHANGELOG.md; \
+			echo "" >> CHANGELOG.md; \
+		fi; \
+		prev=$$tag; \
+	done; \
+	# First release \
+	if [ -n "$$prev" ]; then \
+		version=$$(echo $$prev | sed 's/^v//'); \
+		echo "## [$$version] — $$(git log -1 --format=%ad --date=short $$prev)" >> CHANGELOG.md; \
+		echo "" >> CHANGELOG.md; \
+		echo "### 🎉 Initial Release" >> CHANGELOG.md; \
+		echo "- Initial project setup" >> CHANGELOG.md; \
+		echo "" >> CHANGELOG.md; \
+	fi; \
+	echo "$(GREEN)✓ Full changelog generated$(NC)"
 
 
 # Usage: make prep-release part=patch|minor|major
