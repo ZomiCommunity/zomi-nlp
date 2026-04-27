@@ -79,10 +79,11 @@ class ZomiPipeline:
             task="ner",
             requested=self.config.ner_backend,
             backend_classes={
+                "native": ("zomi_nlp.adapters.zomi_native_adapter", "ZomiNERAdapter"),
                 "spacy": ("zomi_nlp.adapters.spacy_adapter", "SpacyNER"),
                 "stanza": ("zomi_nlp.adapters.stanza_adapter", "StanzaNER"),
             },
-            fallback_order=["spacy", "stanza"]
+            fallback_order=["native", "spacy", "stanza"]
         )
 
     def _select_backend_with_fallback(
@@ -218,6 +219,14 @@ class ZomiPipeline:
                     pass
             except Exception as e:
                 logger.debug(f"Tagger failed (non-fatal): {e}")
+
+        # Lemmatization
+        if hasattr(self, 'lemmatizer') and self.lemmatizer and doc.tokens:
+            try:
+                if self.lemmatizer.is_available():
+                    doc = self.lemmatizer.tag(doc)  # Reuse tag interface
+            except Exception as e:
+                logger.debug(f"Lemmatizer failed (non-fatal): {e}")
 
         # Dependency Parsing (optional)
         if self.parser and doc.tokens:

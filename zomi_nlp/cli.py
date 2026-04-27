@@ -121,9 +121,15 @@ def main():
     if args.text:
         from zomi_nlp import ZomiPipeline
         nlp = ZomiPipeline()
+        print(f"Tokenizer: {nlp.tokenizer.__class__.__name__}")
+        print(f"Tagger: {nlp.tagger.__class__.__name__}")
+        print(f"Parser: {nlp.parser.__class__.__name__}")
         doc = nlp(args.text)
         for token in doc:
-            print(f"{token.text}\t{token.pos_ or 'N/A'}\t{token.lemma_ or 'N/A'}")
+            print(f"{token.text}\
+                  \t{token.pos_ or 'N/A'}\
+                  \t{token.lemma_ or 'N/A'}\
+                  \t{token.ent_type_ or 'N/A'}")
         return
 
     # No arguments, show help

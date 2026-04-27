@@ -5,8 +5,10 @@ from typing import Optional
 
 from zomi_nlp.core.doc import ZomiDoc
 from zomi_nlp.core.token import ZomiToken
-from zomi_nlp.interfaces.backends import ParserBackend, TaggerBackend, TokenizerBackend
+from zomi_nlp.interfaces.backends import NERBackend, ParserBackend, TaggerBackend, TokenizerBackend
 from zomi_nlp.native import ZomiRuleBasedParser
+from zomi_nlp.native.lemmatizer import ZomiLemmatizerBackend
+from zomi_nlp.native.ner import ZomiNER
 from zomi_nlp.native.tagger import ZomiTaggerBackend
 from zomi_nlp.native.tokenizer import ZomiTokenizer
 
@@ -22,7 +24,7 @@ class ZomiParserAdapter(ParserBackend):
     - head      → head
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.parser: ZomiRuleBasedParser = ZomiRuleBasedParser() # This parser does tagging too
         self._name: str = self.parser.__class__.__name__.lower()
         self._available: bool = True
@@ -145,7 +147,7 @@ class ZomiTokenizerAdapter(TokenizerBackend):
 class ZomiTaggerAdapter(TaggerBackend):
     """Tagger adapter using native ZomiPOSTagger."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.tagger: ZomiTaggerBackend = ZomiTaggerBackend()
         self._name: str = "zomi_tagger"
         self._available: bool = True
@@ -163,7 +165,62 @@ class ZomiTaggerAdapter(TaggerBackend):
     def get_error_message(self) -> Optional[str]:
         return None if self._available else "Zomi tagger not available"
 
+
+class ZomiLemmatizerAdapter(TaggerBackend):
+    """Lemmatizer adapter using native ZomiLemmatizer."""
+
+    def __init__(self) -> None:
+        self.lemmatizer: ZomiLemmatizerBackend = ZomiLemmatizerBackend()
+        self._name: str = "zomi_lemmatizer"
+        self._available: bool = True
+
+    def tag(self, doc: ZomiDoc) -> ZomiDoc:
+        """Add lemmas to tokens (uses same interface as tagger)."""
+        return self.lemmatizer.lemmatize(doc)
+
+    def name(self) -> str:
+        return self._name
+
+    def is_available(self) -> bool:
+        return self._available
+
+    def get_error_message(self) -> Optional[str]:
+        return None if self._available else "Zomi lemmatizer not available"
+
+
+class ZomiNERAdapter(NERBackend):
+    """NER adapter using native ZomiNER."""
+
+    def __init__(self) -> None:
+        # from zomi_nlp.native.ner import ZomiNER # Import here to avoid  circular import
+        self.ner = ZomiNER()
+        self._name: str = "zomi_ner"
+        self._available: bool = True
+
+    def recognize(self, doc: ZomiDoc) -> ZomiDoc:
+        """Recognize entities in document."""
+        # Call the extract method and annotate doc
+        entities = self.ner.extract(doc.text)
+        # Mark tokens with entity types
+        for entity in entities:
+            for i in range(entity.start, entity.end + 1):
+                if i < len(doc.tokens):
+                    doc.tokens[i].ent_type_ = entity.type
+                    doc.tokens[i].ent_iob_ = "B" if i == entity.start else "I"
+
+        return doc
+
+
+    def name(self) -> str:
+        return self._name
+
+    def is_available(self) -> bool:
+        return self._available
+
+    def get_error_message(self) -> Optional[str]:
+        return None if self._available else "Zomi NER not available"
 # Alias for backward compatibility
 # ZomiNativeBackend = ZomiParseradapter
 # ZomiTokenizerBackend = ZomiTokenizerAdapter
 # ZomiTaggerBackend = ZomiTaggerAdapter
+# ZomiLemmatizerBackend = ZomiLemmatizerAdapter

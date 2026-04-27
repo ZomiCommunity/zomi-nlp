@@ -5,6 +5,13 @@ This module contains pure Python implementations of Zomi NLP components
 with no external dependencies.
 """
 
+from zomi_nlp.native.lemmatizer import (
+    ZomiLemmatizer,
+    ZomiLemmatizerBackend,
+    lemmatize_with_info_zomi,
+    lemmatize_zomi,
+)
+from zomi_nlp.native.ner import ZomiNER, ZomiNERBackend, extract_entities_zomi
 from zomi_nlp.native.parser import (
     ZomiParserV362,
     ZomiRuleBasedParser,
@@ -43,4 +50,13 @@ __all__ = [
     "ZomiPOSTagger",
     "ZomiTaggerBackend",
     "tag_zomi",
+    # Lemmatizer
+    "ZomiLemmatizer",
+    "ZomiLemmatizerBackend",
+    "lemmatize_zomi",
+    "lemmatize_with_info_zomi",
+    # Named Entity Recognizer
+    "ZomiNER",
+    "ZomiNERBackend",
+    "extract_entities_zomi",
 ]
