@@ -13,6 +13,8 @@ No machine learning, no external dependencies - just pure Zomi linguistics.
 import re
 from collections import defaultdict
 
+from zomi_nlp.native.lexicons import ZOMI_LEXICON, ZOMI_SUFFIXES
+
 
 class ZomiRuleBasedParser:
     """Zomi Rule-Based Parser - Complete NLP using linguistic rules.
@@ -28,64 +30,9 @@ class ZomiRuleBasedParser:
 
     def __init__(self):
         # 1. Lexicon: The semantic truth
-        self.lexicon = {
-            "pasian": {"upos": "NOUN", "feats": "Number=Sing|Proper=Yes"},
-            "lei": {"upos": "NOUN", "feats": "Number=Sing"},
-            "lim": {"upos": "NOUN", "feats": "Number=Sing"},
-            "mel": {"upos": "NOUN", "feats": "Number=Sing"},
-            "kha": {"upos": "NOUN", "feats": "Proper=Yes"},
-            "an": {"upos": "NOUN", "feats": "Number=Sing"},
-            "khuavak": {"upos": "NOUN", "feats": "Number=Sing"},
-            "apple": {"upos": "NOUN", "feats": "Number=Sing"},
-            "sanginn": {"upos": "NOUN", "feats": "Number=Sing"},
-            "sangnaupang": {"upos": "NOUN", "feats": "Number=Sing"},
-            "sangnaupangte": {"upos": "NOUN", "feats": "Number=Plur"},
-            "eite": {"upos": "PRON", "feats": "Number=Plur|Person=1"},
-            "ih": {"upos": "PRON", "feats": "Number=Plur|Person=1|PronType=Prs"},
-            "ka": {"upos": "PRON", "feats": "Number=Sing|Person=1|PronType=Prs"},
-            "na": {"upos": "PRON", "feats": "Number=Sing|Person=2|PronType=Prs"},
-            "amah": {"upos": "PRON", "feats": "Number=Sing|Person=3"},
-            "kua": {"upos": "PRON", "feats": "PronType=Int"},
-            "ne": {"upos": "VERB", "feats": "VerbForm=Fin"},
-            "pai": {"upos": "VERB", "feats": "VerbForm=Fin"},
-            "pia": {"upos": "VERB", "feats": "VerbForm=Fin"}, # To give
-            "piang": {"upos": "VERB", "feats": "VerbForm=Fin"},
-            "piangsak": {"upos": "VERB", "feats": "Voice=Cau|VerbForm=Fin"},
-            "om": {"upos": "VERB", "feats": "_"},
-            "nei": {"upos": "VERB", "feats": "VerbForm=Ger"},
-            "hawmpi": {"upos": "ADJ", "feats": "_"},
-            "khat": {"upos": "NUM", "feats": "NumType=Card"},
-             # Directional Prefix
-            "hong": {"upos": "PRON", "feats": "Person=2|Obj=Yes", "deprel": "expl"},
-            "mengmeng": {"upos": "ADV", "feats": "_", "deprel": "advmod"},
-            "ci": {"upos": "VERB", "feats": "VerbForm=Fin"}, # Lemma for ci-a
-            "kik": {"upos": "ADV", "feats": "Aspect=Iter", "deprel": "advmod"},
-            "pah": {"upos": "ADV", "feats": "AdvType=Tim", "deprel": "advmod"},
-        }
-
-        # 2. Suffix/Particle Table: The functional truth
-        self.suffix_table = {
-            "ve": {"upos": "PART", "feats": "Mood=Ind|Polite=Yes", "deprel": "discourse"},
-            "maw": {"upos": "PART", "feats": "PartType=Int|Mood=Des", "deprel": "discourse"},
-            "tawh": {"upos": "ADP", "feats": "Case=Com", "deprel": "case"}, # For 'Hehpihna tawh'
-            "in": {"upos": "ADP", "feats": "Case=Erg", "deprel": "case"},
-            "hehpihna": {"upos": "NOUN", "feats": "Number=Sing"},
-            "ii": {"upos": "PART", "feats": "Case=Gen", "deprel": "case"},
-            "pen": {"upos": "PART", "feats": "Topic=Yes", "deprel": "case"},
-            "hi": {"upos": "PART", "feats": "_", "deprel": "discourse"},
-            "hikei": {"upos": "AUX", "feats": "Polarity=Neg|VerbForm=Fin", "deprel": "cop"},
-            "ahi": {"upos": "AUX", "feats": "VerbForm=Fin", "deprel": "cop"},
-            "sa": {"upos": "AUX", "feats": "Tense=Past", "deprel": "aux"},
-            "uh": {"upos": "PART", "feats": "Number=Plur", "deprel": "clf"},
-            "laitak": {"upos": "PART", "feats": "Aspect=Prog", "deprel": "aux"},
-            "ngei": {"upos": "PART", "feats": "Aspect=Perf", "deprel": "advmod"},
-            "khin": {"upos": "PART", "feats": "Aspect=Perf", "deprel": "aux"},
-            "kei": {"upos": "PART", "feats": "Polarity=Neg", "deprel": "advmod"},
-            "hen": {"upos": "PART", "feats": "Mood=Imp", "deprel": "advmod"},
-            "loin": {"upos": "PART", "feats": "Polarity=Neg", "deprel": "advmod"},
-            "le": {"upos": "CCONJ", "feats": "_", "deprel": "cc"},
-            "hiam": {"upos": "PART", "feats": "PartType=Int", "deprel": "discourse"},
-        }
+        self.lexicon = ZOMI_LEXICON
+        # 2. Suffix Table: The morphological toolkit
+        self.suffix_table = ZOMI_SUFFIXES
 
     def analyze_morphology(self, token):
         t = token.lower()
