@@ -92,20 +92,16 @@ class ZomiNER:
     def extract(self, text: str) -> list[Entity]:
         """Extract named entities from text."""
         tokens = self.tokenizer.tokenize(text)
-        print(f"Tokens for NER: {tokens}")
         entities = []
 
         # 1. Gazetteer-based extraction
         entities.extend(self._extract_from_gazetteers(tokens))
-        print(f"Entities after gazetteer extraction: {entities}")
 
         # 2. Context-based extraction
         entities.extend(self._extract_from_context(tokens))
-        print(f"Entities after context extraction: {entities}")
 
         # 3. Merge overlapping entities
         entities = self._merge_entities(entities)
-        print(f"Entities after merging: {entities}")
         entities.sort(key=lambda e: e.start)
 
         return entities
