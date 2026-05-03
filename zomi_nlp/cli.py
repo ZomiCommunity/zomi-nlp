@@ -127,16 +127,49 @@ def main():
         print(f"NER: {nlp.ner.__class__.__name__}")
 
         print("\nProcessing text...\n")
-        doc = nlp(args.text)
-        print(f"\n{'Token'}\t{'POS'}\t{'Lemma'}\t{'Entity'}\t{'Dep'}\t{'Morph'}\t{'Features'}")
-        for token in doc:
-            print(f"{token.text}\
-                  \t{token.pos_ or 'N/A'}\
-                  \t{token.lemma_ or 'N/A'}\
-                  \t{token.ent_type_ or 'N/A'}\
-                  \t{token.dep_ or 'N/A'}\
-                  \t{token.morph or 'N/A'}\
-                  \t{token.feats or 'N/A'}")
+        sentence = args.text
+        doc = nlp(sentence)
+        print("📊 Extended CoNLL-U Format (16 columns with metadata):")
+        print("   COLs: ID | FORM | LEMMA | UPOS | XPOS | FEATS | HEAD | DEPREL | DEPS | MISC |\
+               TEXT | TEXT_EN | GENRE | SOURCE | ANNOTATOR | STATUS\n")
+
+        # Mock metadata for demonstration
+        metadata = {
+            "text_en": "_", # "We are not the students of the school.",
+            "genre": "Sample",
+            "source": "ZOMI-Sample-001",
+            "annotator": "ZomiNLP-v0.4.0",
+            "status": "Final"
+        }
+
+        print(f"# text = {sentence}")
+        print(f"# text_en = {metadata['text_en']}")
+        print(f"# genre = {metadata['genre']}")
+        print(f"# source = {metadata['source']}")
+        print(f"# annotator = {metadata['annotator']}")
+        print(f"# status = {metadata['status']}")
+
+        for i, token in enumerate(doc.tokens, 1):
+            # 16-column format
+            conllu_line = "\t".join([
+                str(i),                           # 1: ID
+                token.text,                       # 2: FORM
+                token.lemma_ or "_",              # 3: LEMMA
+                token.pos_ or "_",                # 4: UPOS
+                "_",                              # 5: XPOS
+                token.morph_to_string() if hasattr(token, 'morph_to_string') else "_",  # 6: FEATS
+                str(token.head) if token.head >= 0 else "0",  # 7: HEAD
+                token.dep_ or "_",                # 8: DEPREL
+                "_",                              # 9: DEPS
+                "_",                              # 10: MISC
+                sentence if i == 1 else "_",      # 11: TEXT (on first row)
+                metadata['text_en'] if i == 1 else "_",  # 12: TEXT_EN
+                metadata['genre'],                # 13: GENRE
+                metadata['source'],               # 14: SOURCE
+                metadata['annotator'],            # 15: ANNOTATOR
+                metadata['status'],               # 16: STATUS
+            ])
+            print(conllu_line)
         return
 
     # No arguments, show help

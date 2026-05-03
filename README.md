@@ -9,12 +9,23 @@ Natural Language Processing toolkit for the **Zomi language (Zopau)**.
 
 ## Features
 
-- 🔤 **Tokenization** - Smart tokenization with Zomi clitic handling
-- 🏷️ **POS Tagging** - Part-of-speech tagging
-- 🌲 **Dependency Parsing** - Grammatical structure analysis
-- 📍 **Named Entity Recognition** - Entity extraction
-- 🔌 **Pluggable Backends** - Use spaCy, Stanza, or native implementations
+- 🔤 **Tokenization** - Smart tokenization with clitic splitting, reduplication handling, and compound word support
+- 🏷️ **POS Tagging** - Rule-based part-of-speech tagging with 600+ lexicon entries
+- 📖 **Lemmatization** - Morphological lemmatization with clitic removal and affix stripping
+- 🌲 **Dependency Parsing** - Grammatical structure analysis with Zomi-specific rules
+- 📍 **Named Entity Recognition** - Entity extraction for PERSON, LOCATION, GPE, DATE, NUMERIC
+- 🔬 **Morphological Analysis** - Morpheme segmentation and feature extraction
+- 🔌 **Pluggable Backends** - Use native Zomi, spaCy, or Stanza backends
+- 📊 **CoNLL-U Export** - Standard 10-column and extended 16-column formats
 - 🚀 **Production Ready** - CI/CD, type hints, comprehensive testing
+
+### Coming Soon (v0.5.0+)
+
+- 🔤 **Word Sense Disambiguation** - Context-aware meaning disambiguation
+- 📚 **Sense Lexicon** - Word sense inventory with examples
+- 📈 **Statistical Disambiguation** - Frequency-based sense prediction
+- 🏷️ **Sense Tagger** - Automatic sense annotation
+- 🔧 **Nominalizer Detector** - Rule-based `-na` suffix detection with stem alternation handling
 
 ## Requirements
 
@@ -28,7 +39,7 @@ it will prefer Stanza (more accurate) but fall back to spaCy (faster) if needed.
 
 ### Installation Options
 
-### Minimal Installation (Basic Tokenization Only)
+### Minimal Installation (Native Only)
 
 ```bash
 pip install zomi-nlp
@@ -62,19 +73,47 @@ from zomi_nlp import load
 nlp = load()
 
 # Process text
-text = "An ka ne hi."
+text = "Tuni an ka ne hi."
 doc = nlp(text)
 
 # Access tokens
 for token in doc:
-    print(f"{token.text}\t{token.pos_}\t{token.lemma_}")
+    print(f"{token.text}\t{token.pos_}\t{token.lemma_}\t{token.ent_type_ or 'N/A'}")
 
 # Output:
-# An      NOUN    an
-# ka      PRON    ka
-# ne      VERB    ne
-# hi      PART    hi
-# .       PUNCT   .
+# Tuni    DATE    tuni    DATE
+# an      NOUN    an      N/A  
+# ka      PRON    ka      N/A
+# ne      VERB    ne      N/A
+# hi      PART    hi      N/A
+# .       PUNCT   .       N/A
+```
+
+## Native Pipeline Components
+
+Zomi NLP v0.4.0 introduces a complete native pipeline with no external dependencies:
+| Component                 | Description                                           |
+|---------------------------|-------------------------------------------------------|
+| ZomiTokenizer             | Clitic splitting, reduplication, compound words, punctuation |
+| ZomiPOSTagger             | Rule-based POS tagging with 600+ lexicon entries     |
+| ZomiLemmatizer            | Morphological lemmatization with irregular form handling |
+| ZomiDependencyParser      | Zomi-specific dependency relations (nsubj, obj, case, etc.) |
+| ZomiNER                   | Named entity recognition for 6+ entity types         |
+| ZomiMorphologicalAnalyzer | Morpheme segmentation and feature extraction         |
+
+## CoNLL-U Export
+
+```python
+from zomi_nlp import load
+
+nlp = load()
+doc = nlp("Ka pai ve.")
+
+# Export to standard CoNLL-U format
+for token in doc:
+    print(f"{token.text}\t{token.lemma_}\t{token.pos_}\t{token.head}\t{token.dep_}")
+
+# Output format: ID FORM LEMMA UPOS XPOS FEATS HEAD DEPREL DEPS MISC
 ```
 
 ## Configuration
@@ -82,17 +121,41 @@ for token in doc:
 ```
 from zomi_nlp import ZomiConfig, ZomiPipeline
 
+# Use native Zomi pipeline (default, no dependencies)
+config = ZomiConfig(parser_backend="native")
+nlp = ZomiPipeline(config)
+
 # Use spaCy for speed
-config = ZomiConfig(tokenizer_backend="spacy", tagger_backend="spacy")
+config = ZomiConfig(parser_backend="spacy")
 nlp = ZomiPipeline(config)
 
 # Use Stanza for accuracy
-config = ZomiConfig(tokenizer_backend="stanza", tagger_backend="stanza")
+config = ZomiConfig(parser_backend="stanza")
 nlp = ZomiPipeline(config)
 
-# Auto-select best available (recommended)
-config = ZomiConfig(tokenizer_backend="auto")
+# Auto-select best available
+config = ZomiConfig(parser_backend="auto")
 nlp = ZomiPipeline(config)
+```
+
+## CLI Usage
+
+```bash
+# Check installation status
+zomi-nlp --check
+
+# Diagnose issues
+zomi-nlp --doctor
+
+# Process text directly
+zomi-nlp "Tuni ka pai ve."
+
+# Output:
+# Tuni     DATE     tuni
+# ka       PRON     ka
+# pai      VERB     pai
+# hi       PART     hi
+# .        PUNCT    .
 ```
 
 ## Checking Installation
@@ -109,18 +172,6 @@ print(status)
 ```
 
 ## Troubleshooting
-
-### Check your installation
-
-```bash
-zomi-nlp --check
-```
-
-### Diagnose issues automatically
-
-```bash
-zomi-nlp --doctor
-```
 
 ### "stanza not installed" Warning
 
@@ -173,15 +224,27 @@ black zomi_nlp/ tests/
 
 ## Roadmap
 
-- v0.1.0 - Core architecture + spaCy/Stanza adapters
-- v0.2.0 - Zomi-native tokenizer
-- v0.3.0 - Zomi POS tagger
-- v0.4.0 - Zomi dependency parser
-- v1.0.0 - Fully native implementation
+| Version | Features                                   | Status      |
+|---------|---------------------------------------------|-------------|
+| v0.1.0  | Core architecture + spaCy/Stanza adapters   | ✅ Released |
+| v0.2.0  | spaCy/Stanza backends                       | ✅ Released |
+| v0.3.0  | ZomiRuleBasedParser                         | ✅ Released |
+| v0.4.0  | Complete native pipeline                    | ✅ Current  |
+| v0.5.0  | Word embeddings, sense disambiguation       | 🔜 Planned  |
+| v0.6.0  | ML-based components                         | 🔜 Planned  |
+| v1.0.0  | Production ready                            | 🔜 Planned  |
+
+## Planned Features for v0.5.0
+
+- ZomiWordSenseDisambiguator - Context-aware meaning disambiguation
+- ZOMI_SENSE_LEXICON - Word sense inventory with examples
+- StatisticalDisambiguator - Frequency-based sense prediction
+- ZomiSenseTagger - Automatic sense annotation
+- ZomiNominalizerDetector - Rule-based -na suffix detection with stem alternation handling (e.g., pia → piakna, um → upna)
 
 ## Contributing
 
-Contributions welcome! See CONTRIBUTING.md for guidelines.
+Contributions welcome! See [CONTRIBUTING](CONTRIBUTING.md) for guidelines.
 
 ## License
 
@@ -203,3 +266,18 @@ Apache License 2.0
 - Built with ❤️ for the Zomi community
 - Uses spaCy and Stanza as backends
 - Inspired by universal dependencies framework
+
+
+## 📝 Summary of Changes
+
+| Section | Change |
+|---------|--------|
+| **Features** | Added lemmatization, morphological analysis, CoNLL-U export |
+| **Coming Soon** | New section listing planned features (disambiguator, sense lexicon, etc.) |
+| **Native Pipeline** | New section documenting all native components |
+| **CoNLL-U Export** | New section with example |
+| **CLI Usage** | New section with command examples |
+| **Roadmap** | Converted to table format, marked v0.4.0 as current |
+| **Planned Features** | Detailed list of v0.5.0 features including those you asked about |
+
+The planned features section clearly indicates that **ZomiWordSenseDisambiguator**, **ZOMI_SENSE_LEXICON**, **StatisticalDisambiguator**, **ZomiSenseTagger**, and **ZomiNominalizerDetector** are coming in v0.5.0, not yet available in v0.4.0. 🚀

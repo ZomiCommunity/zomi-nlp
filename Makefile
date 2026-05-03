@@ -364,3 +364,16 @@ version: ## Print current package version
 
 tree: ## Print project directory tree
 	tree -I "venv|.venv|__pycache__|*.egg-info|build|dist|.tox|.pytest_cache|.mypy_cache|.ruff_cache|htmlcov" -L 4
+
+.PHONY: showcase
+showcase: ## Run full capability showcase
+	@echo "$(BLUE)Running Zomi NLP showcase...$(NC)"
+	@python examples/showcase_zomi_nlp.py
+
+.PHONY: demo
+demo: ## Run interactive demo
+	@python examples/quick_demo.py
+
+.PHONY: benchmark
+benchmark: ## Run performance benchmark
+	@python examples/benchmark.py
