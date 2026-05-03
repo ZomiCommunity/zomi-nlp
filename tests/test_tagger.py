@@ -71,7 +71,7 @@ class TestZomiPOSTagger:
         results = tagger.tag_with_context(tokens)
 
         # 'ka' before verb should be PRON
-        for token, tag, feats in results:
+        for token, tag, _ in results:
             if token == "ka":
                 assert tag == "PRON"
 

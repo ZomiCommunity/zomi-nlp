@@ -41,7 +41,7 @@ def test_morphological_analyser_with_reduplication():
     assert result["root"] == "piangsak"
     assert result["pos"] == "VERB"
     assert isinstance(result["features"], dict)
-    
+
     # Expected features from root + prefix + suffix
     # Root "piangsak" should have: Voice=Cau, VerbForm=Fin
     assert result["features"].get("Voice") == "Cau"
@@ -52,7 +52,7 @@ def test_morphological_analyser_with_reduplication():
     # Suffix "ve" adds: Mood=Ind, Polite=Yes
     assert result["features"].get("Mood") == "Ind"
     assert result["features"].get("Polite") == "Yes"
-    
+
     # Check morphemes in order
     assert result["morphemes"][0][0] == "ka"
     assert result["morphemes"][0][1] == "prefix"
@@ -66,13 +66,13 @@ def test_morphological_analyser_features_to_string():
     """Test converting features dict to string."""
     from zomi_nlp.native.morphology import ZomiMorphologicalAnalyzer
     analyzer = ZomiMorphologicalAnalyzer()
-    
+
     features = {"Person": "1", "Number": "Sing"}
     result = analyzer.features_to_string(features)
     # Order may vary, so check components
     assert "Person=1" in result
     assert "Number=Sing" in result
     assert "|" in result
-    
+
     features = {}
     assert analyzer.features_to_string(features) == "_"

@@ -1,6 +1,7 @@
 # test_complete_pipeline.py
 from zomi_nlp.native.parser import ZomiRuleBasedParser
 
+
 def test_complete_pipeline():
     parser = ZomiRuleBasedParser()
     result = parser.parse("Tuni hong pai mengmeng ve")

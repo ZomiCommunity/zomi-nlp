@@ -107,7 +107,7 @@ test-all: ## Run tests on all Python versions
 
 lint: ## Lint code
 	@echo "$(YELLOW)Linting code...$(NC)"
-	ruff check zomi_nlp/
+	ruff check .
 	mypy zomi_nlp/ --ignore-missing-imports
 	@echo "$(GREEN)Linting complete!$(NC)"
 

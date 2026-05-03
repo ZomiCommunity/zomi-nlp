@@ -5,20 +5,19 @@ Run: python examples/showcase_zomi_nlp.py
 """
 
 import sys
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 # Add parent directory to path if running directly
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from zomi_nlp import __version__, ZomiPipeline, ZomiConfig
+from zomi_nlp import ZomiConfig, ZomiPipeline, __version__
 from zomi_nlp.native import (
-    ZomiTokenizer,
-    ZomiPOSTagger,
-    ZomiLemmatizer,
     ZomiDependencyParser,
+    ZomiLemmatizer,
     ZomiNER,
-    ZomiMorphologicalAnalyzer,
+    ZomiPOSTagger,
+    ZomiTokenizer,
     analyze_morphology,
 )
 from zomi_nlp.utils import check_installation
@@ -34,16 +33,16 @@ def print_header(title: str, char: str = "="):
 def showcase_basic_usage():
     """Show basic pipeline usage."""
     print_header("1. BASIC PIPELINE USAGE", "=")
-    
+
     nlp = ZomiPipeline()
-    
+
     texts = [
         "Ka pai ve.",
         "Na pai hi?",
         "Tuni ka pai ve.",
         "Pasian in leitung a piangsak hi.",
     ]
-    
+
     for text in texts:
         doc = nlp(text)
         print(f"📝 Input: {text}")
@@ -56,9 +55,9 @@ def showcase_basic_usage():
 def showcase_tokenizer():
     """Show tokenizer capabilities."""
     print_header("2. TOKENIZER CAPABILITIES", "=")
-    
+
     tokenizer = ZomiTokenizer()
-    
+
     examples = [
         ("Basic tokens", "Ka pai ve."),
         ("Clitic splitting", "Ka zohve hi."),
@@ -67,7 +66,7 @@ def showcase_tokenizer():
         ("Multiple clitics", "kapiangsakve"),
         ("Question particles", "Na pai na hiam?"),
     ]
-    
+
     for name, text in examples:
         tokens = tokenizer.tokenize(text)
         print(f"🔤 {name}:")
@@ -78,10 +77,10 @@ def showcase_tokenizer():
 def showcase_pos_tagger():
     """Show POS tagging capabilities."""
     print_header("3. POS TAGGING CAPABILITIES", "=")
-    
+
     tagger = ZomiPOSTagger()
     tokenizer = ZomiTokenizer()
-    
+
     sentences = [
         "Ka pai ve.",
         "Na pai hi?",
@@ -89,11 +88,11 @@ def showcase_pos_tagger():
         "Sangnaupang khat ka hi hi.",
         "Eite pen sanginn pen ii sangnaupangte ih hikei uh hi.",
     ]
-    
+
     for sentence in sentences:
         tokens = tokenizer.tokenize(sentence)
         tagged = tagger.tag_with_context(tokens)
-        
+
         print(f"📝 Sentence: {sentence}")
         print(f"   {'Token':<15} {'POS':<12} {'Features'}")
         print(f"   {'-'*40}")
@@ -106,10 +105,10 @@ def showcase_pos_tagger():
 def showcase_lemmatizer():
     """Show lemmatization capabilities."""
     print_header("4. LEMMATIZER CAPABILITIES", "=")
-    
+
     lemmatizer = ZomiLemmatizer()
-    tokenizer = ZomiTokenizer()
-    
+    # tokenizer = ZomiTokenizer()
+
     examples = [
         ("zohve", "Verb with clitic"),
         ("kapiangsakve", "Full word with prefix+suffix"),
@@ -117,12 +116,12 @@ def showcase_lemmatizer():
         ("hikei", "Negative copula"),
         ("mahmah", "Reduplicated"),
     ]
-    
+
     print(f"{'Word':<20} {'Lemma':<15} {'Method':<12}")
     print("-" * 50)
-    for word, desc in examples:
-        tokens = tokenizer.tokenize(word)
-        lemmas = lemmatizer.lemmatize(tokens)
+    for word, _ in examples:
+        # tokens = tokenizer.tokenize(word)
+        # lemmas = lemmatizer.lemmatize(tokens)
         lemma, method = lemmatizer._get_lemma_with_method(word)
         print(f"{word:<20} {lemma:<15} {method:<12}")
     print()
@@ -131,7 +130,7 @@ def showcase_lemmatizer():
 def showcase_morphological_analyzer():
     """Show morphological analysis capabilities."""
     print_header("5. MORPHOLOGICAL ANALYZER", "=")
-    
+
     words = [
         "kapiangsakve",
         "upna",
@@ -140,7 +139,7 @@ def showcase_morphological_analyzer():
         "mahmah",
         "pasian",
     ]
-    
+
     for word in words:
         result = analyze_morphology(word)
         print(f"🔬 Word: {result['word']}")
@@ -149,20 +148,20 @@ def showcase_morphological_analyzer():
         print(f"   Features: {result['features']}")
         print(f"   Morphemes: {result['morphemes']}")
         if result['is_compound']:
-            print(f"   ⚡ Compound: Yes")
+            print("   ⚡ Compound: Yes")
         if result['is_reduplicated']:
-            print(f"   🔄 Reduplicated: Yes")
+            print("   🔄 Reduplicated: Yes")
         if result['has_clitic']:
-            print(f"   🔗 Has clitic: Yes")
+            print("   🔗 Has clitic: Yes")
         print()
 
 
 def show_ner():
     """Show Named Entity Recognition capabilities."""
     print_header("6. NAMED ENTITY RECOGNITION", "=")
-    
+
     ner = ZomiNER()
-    
+
     texts = [
         ("Pasian", "Person name"),
         ("Jerusalem", "Location"),
@@ -170,65 +169,67 @@ def show_ner():
         ("Tuni", "Date"),
         ("khat", "Number"),
     ]
-    
+
     for text, desc in texts:
         entities = ner.extract(text)
         print(f"📍 {desc}: '{text}'")
         if entities:
             for ent in entities:
-                print(f"   → Entity: {ent.text} (Type: {ent.type}, Confidence: {ent.confidence:.2f})")
+                print(f"   → Entity: {ent.text} (Type: {ent.type}, \
+                      Confidence: {ent.confidence:.2f})")
         else:
-            print(f"   → No entities found")
+            print("   → No entities found")
     print()
 
 
 def show_dependency_parser():
     """Show dependency parsing capabilities."""
     print_header("7. DEPENDENCY PARSING", "=")
-    
+
     parser = ZomiDependencyParser()
     tokenizer = ZomiTokenizer()
     tagger = ZomiPOSTagger()
-    
+
     sentences = [
         "Ka pai ve.",
         "Pasian in leitung a piangsak hi.",
     ]
-    
+
     for sentence in sentences:
         tokens = tokenizer.tokenize(sentence)
         pos_tags = [tag for _, tag, _ in tagger.tag_with_context(tokens)]
-        
+
         dep_result = parser.parse(tokens, pos_tags)
-        
+
         print(f"📝 Sentence: {sentence}")
         print(f"   {'ID':<4} {'Form':<15} {'POS':<8} {'Head':<6} {'Deprel'}")
         print(f"   {'-'*50}")
         for token in dep_result:
-            print(f"   {token['id']:<4} {token['form']:<15} {token['upos']:<8} {token['head']:<6} {token['deprel']}")
+            print(f"   {token['id']:<4} {token['form']:<15} {token['upos']:<8} \
+                  {token['head']:<6} {token['deprel']}")
         print()
 
 
 def showcase_conllu_export():
     """Show CoNLL-U export capabilities."""
     print_header("8. CONLL-U EXPORT", "=")
-    
+
     nlp = ZomiPipeline()
-    
+
     sentences = [
         "Ka pai ve.",
         "Pasian in leitung a piangsak hi.",
         "Eite pen sanginn pen ii sangnaupangte ih hikei uh hi.",
     ]
-    
+
     print("📋 CoNLL-U Format (10-column Universal Dependencies standard):")
     print("   COLs: ID | FORM | LEMMA | UPOS | XPOS | FEATS | HEAD | DEPREL | DEPS | MISC\n")
-    
+
     for sentence in sentences:
         doc = nlp(sentence)
-        
+
         print(f"# text = {sentence}")
-        
+
         for i, token in enumerate(doc.tokens, 1):
             # Format: ID FORM LEMMA UPOS XPOS FEATS HEAD DEPREL DEPS MISC
             conllu_line = "\t".join([
@@ -244,12 +245,12 @@ def showcase_conllu_export():
                 "_",                              # MISC
             ])
             print(conllu_line)
-        
+
         print()  # Empty line between sentences
-    
+
     # Also show how to export to file
     print_header("8a. EXPORT TO CONLL-U FILE", "-")
-    
+
     with tempfile.NamedTemporaryFile(mode='w', suffix='.conllu', delete=False) as f:
         for sentence in sentences:
             doc = nlp(sentence)
@@ -264,30 +265,31 @@ def showcase_conllu_export():
                 ])
                 f.write(conllu_line + "\n")
             f.write("\n")
-        
+
         print(f"💾 CoNLL-U file exported to: {f.name}")
         print(f"   File size: {Path(f.name).stat().st_size} bytes")
-        print(f"\n   Sample content:")
-        with open(f.name, 'r') as sample:
+        print("\n   Sample content:")
+        with open(f.name) as sample:
             lines = sample.readlines()[:10]
             for line in lines:
                 print(f"   {line.rstrip()}")
-    
+
     print()
 
 
 def showcase_16_column_export():
     """Show 16-column CoNLL-U export (extended format)."""
     print_header("9. 16-COLUMN EXTENDED EXPORT", "=")
-    
+
     nlp = ZomiPipeline()
-    
+
     sentence = "Eite pen sanginn pen ii sangnaupangte ih hikei uh hi."
     doc = nlp(sentence)
-    
+
     print("📊 Extended CoNLL-U Format (16 columns with metadata):")
-    print("   COLs: ID | FORM | LEMMA | UPOS | XPOS | FEATS | HEAD | DEPREL | DEPS | MISC | TEXT | TEXT_EN | GENRE | SOURCE | ANNOTATOR | STATUS\n")
-    
+    print("   COLs: ID | FORM | LEMMA | UPOS | XPOS | FEATS | HEAD | DEPREL | DEPS | MISC | \
+          TEXT | TEXT_EN | GENRE | SOURCE | ANNOTATOR | STATUS\n")
+
     # Mock metadata for demonstration
     metadata = {
         "text_en": "We are not the students of the school.",
@@ -296,14 +298,14 @@ def showcase_16_column_export():
         "annotator": "ZomiNLP-v0.4.0",
         "status": "Final"
     }
-    
+
     print(f"# text = {sentence}")
     print(f"# text_en = {metadata['text_en']}")
     print(f"# genre = {metadata['genre']}")
     print(f"# source = {metadata['source']}")
     print(f"# annotator = {metadata['annotator']}")
     print(f"# status = {metadata['status']}")
-    
+
     for i, token in enumerate(doc.tokens, 1):
         # 16-column format
         conllu_line = "\t".join([
@@ -325,21 +327,21 @@ def showcase_16_column_export():
             metadata['status'],               # 16: STATUS
         ])
         print(conllu_line)
-    
+
     print()
 
 
 def show_cli_commands():
     """Show CLI commands."""
     print_header("10. CLI COMMANDS", "=")
-    
+
     commands = [
         ("zomi-nlp --version", "Show version"),
         ("zomi-nlp --check", "Check installation status"),
         ("zomi-nlp --doctor", "Diagnose installation issues"),
         ("zomi-nlp 'Ka pai ve.'", "Process text directly"),
     ]
-    
+
     print("💻 Available CLI commands:")
     for cmd, desc in commands:
         print(f"   {cmd:<35} # {desc}")
@@ -349,11 +351,11 @@ def show_cli_commands():
 def show_backend_comparison():
     """Compare different backends."""
     print_header("11. BACKEND COMPARISON", "=")
-    
+
     text = "Ka pai ve."
-    
+
     backends = ["native", "spacy", "stanza"]
-    
+
     for backend in backends:
         try:
             config = ZomiConfig(parser_backend=backend)
@@ -369,21 +371,21 @@ def show_backend_comparison():
 def show_nominalization_rules():
     """Show -na nominalization rules."""
     print_header("12. NOMINALIZATION RULES (-NA SUFFIX)", "=")
-    
+
     examples = [
         ("it", "love (verb)", "itna", "love (noun)"),
         ("pia", "give (verb)", "piakna", "giving (noun)"),
         ("um", "believe (verb)", "upna", "belief (noun)"),
         ("zoh", "watch (verb)", "zohna", "watching (noun)"),
     ]
-    
+
     print("🔍 Zomi -na Nominalization Pattern:")
     print(f"   {'Verb':<12} {'Meaning':<18} {'Noun':<12} {'Meaning'}")
     print(f"   {'-'*50}")
     for verb, verb_meaning, noun, noun_meaning in examples:
         print(f"   {verb:<12} {verb_meaning:<18} {noun:<12} {noun_meaning}")
     print()
-    
+
     print("🧠 Stem alternation rules detected automatically!")
     print("   - pia → piak + na (insert 'k')")
     print("   - um → up + na (m → p)")
@@ -393,7 +395,7 @@ def show_nominalization_rules():
 def show_particle_system():
     """Show particle system capabilities."""
     print_header("13. PARTICLE SYSTEM", "=")
-    
+
     particles = {
         "ve": "Polite/Indicative",
         "ta": "Emphatic",
@@ -409,7 +411,7 @@ def show_particle_system():
         "ngei": "Perfective aspect",
         "khin": "Completed aspect",
     }
-    
+
     print("📌 Zomi Particles and Their Functions:")
     print(f"   {'Particle':<10} {'Function'}")
     print(f"   {'-'*40}")
@@ -421,9 +423,9 @@ def show_particle_system():
 def show_sentence_examples():
     """Show complete sentence examples with all annotations."""
     print_header("14. COMPLETE SENTENCE EXAMPLES", "=")
-    
+
     nlp = ZomiPipeline()
-    
+
     examples = [
         ("Simple statement", "Ka pai ve."),
         ("Question", "Na pai na hiam?"),
@@ -431,7 +433,7 @@ def show_sentence_examples():
         ("With topic marker", "Eite pen ka pai ve."),
         ("Complex", "Pasian in vantung leh leitung a piangsak hi."),
     ]
-    
+
     for name, sentence in examples:
         doc = nlp(sentence)
         print(f"📖 {name}: {sentence}")
@@ -442,7 +444,8 @@ def show_sentence_examples():
             ent = token.ent_type_ or "N/A"
             dep = token.dep_ or "N/A"
             head = token.head if token.head >= 0 else "0"
-            print(f"   {token.text:<15} {token.pos_ or 'N/A':<10} {token.lemma_ or 'N/A':<12} {head:<6} {dep:<12} {ent}")
+            print(f"   {token.text:<15} {token.pos_ or 'N/A':<10} {token.lemma_ or 'N/A':<12} \
+                  {head:<6} {dep:<12} {ent}")
         print()
 
 
@@ -452,10 +455,10 @@ def main():
     print("         ZOMI NLP - COMPLETE CAPABILITIES SHOWCASE")
     print("         Version: " + __version__)
     print("🎯" * 30)
-    
+
     # Check installation first
     check_installation(verbose=False)
-    
+
     # Run all showcases
     showcase_basic_usage()
     showcase_tokenizer()
@@ -471,7 +474,7 @@ def main():
     show_nominalization_rules()
     show_particle_system()
     show_sentence_examples()
-    
+
     print("\n" + "✅" * 30)
     print("         SHOWCASE COMPLETE!")
     print("         Zomi NLP is ready for production!")
