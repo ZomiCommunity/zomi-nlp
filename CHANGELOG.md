@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.1] — 2026-05-03
+
+### 📦 Changes
+
+- docs(readme): Major documentation overhaul
+  - Expanded feature list (lemmatization, morphological analysis, CoNLL‑U export)
+  - Added Coming Soon section for v0.5.0+ (sense lexicon, WSD, nominalizer detector)
+  - Introduced full native pipeline documentation with component table
+  - Added CoNLL‑U export example and improved usage demo
+  - Added CLI usage section with commands
+  - Updated configuration examples to use unified parser_backend
+  - Replaced roadmap list with structured version table
+  - Added detailed planned features for v0.5.0
+  - Added summary of changes section
+
+- docs: Add example scripts (benchmark, quick demo, showcase) and Makefile target
+- feat(cli): Add extended 16‑column CoNLL‑U output with metadata
+- chore(ner): Remove print statements
+- chore(ner): Remove obsolete commented code
+
+### 📝 Summary
+
+This patch release focuses on documentation quality, developer experience, and CLI output improvements. No breaking changes were introduced.
+
+
 ## [0.4.0] — 2026-04-27
 
 ### 📦 Changes
