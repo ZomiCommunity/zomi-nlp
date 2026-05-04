@@ -96,7 +96,7 @@ class ZomiMorphologicalAnalyzer:
                     prefix_features = self._parse_features(prefix_info.get("feats", ""))
                     morphemes.append(Morpheme(
                         form=prefix,
-                        type=prefix_info["type"],
+                        type=prefix_info["morph_type"],
                         gloss=prefix_info["gloss"],
                         features=prefix_features.copy()
                     ))
@@ -136,7 +136,7 @@ class ZomiMorphologicalAnalyzer:
                 suffix_features = self._parse_features(suffix_info.get("feats", ""))
                 suffixes_found.append(Morpheme(
                     form=suffix,
-                    type=suffix_info["type"],
+                    type=suffix_info["morph_type"],
                     gloss=suffix_info["gloss"],
                     features=suffix_features.copy()
                 ))
