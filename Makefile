@@ -98,7 +98,7 @@ quick-test: ## Run quick tests (smoke test, basic functionality)
 
 test: ## Run tests
 	@echo "$(GREEN)Running tests...$(NC)"
-	pytest tests/ -v --cov=zomi_nlp --cov-report=term --cov-report=html
+	pytest -o log_cli=true -o log_cli_level=DEBUG tests/ -v --cov=zomi_nlp --cov-report=term --cov-report=html
 	@echo "$(GREEN)Tests complete! Coverage report: htmlcov/index.html$(NC)"
 
 test-all: ## Run tests on all Python versions

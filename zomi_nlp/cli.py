@@ -135,10 +135,10 @@ def main():
 
         # Mock metadata for demonstration
         metadata = {
-            "text_en": "_", # "We are not the students of the school.",
+            "text_en": "[en]", # "We are not the students of the school.",
             "genre": "Sample",
             "source": "ZOMI-Sample-001",
-            "annotator": "ZomiNLP-v0.4.0",
+            "annotator": f"ZomiNLP-v{__version__}",
             "status": "Final"
         }
 
