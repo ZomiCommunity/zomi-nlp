@@ -11,7 +11,10 @@ Features:
 - Sentence splitting with abbreviation handling
 """
 
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 # -----------------------------
 # Zomi syllable validator
@@ -187,9 +190,11 @@ class PluralSuffixSplitter:
     def split(self, word: str) -> list[str]:
         """Split plural suffix -te from nouns only."""
         word_lower = word.lower()
+        logger.debug(f"PluralSplitter: checking '{word}'")
 
         # NEVER split pronouns
         if word_lower in self.INDIVISIBLE_PRONOUNS:
+            logger.debug(f"PluralSplitter: '{word}' is an indivisible pronoun")
             return [word]
 
         # Check if word ends with 'te' and is long enough
@@ -198,10 +203,12 @@ class PluralSuffixSplitter:
 
             # Split only if base is a noun that takes plural
             if base in self.SPLITTABLE_NOUNS:
+                logger.debug(f"PluralSplitter: splitting '{word}' → '{base}' + 'te'")
                 # Preserve original case
                 original_base = word[:-len(self.PLURAL_SUFFIX)]
                 return [original_base, self.PLURAL_SUFFIX]
 
+        logger.debug(f"PluralSplitter: no split for '{word}'") 
         return [word]
 
 
@@ -236,21 +243,28 @@ class ZomiTokenizer:
         return tokens
 
     def _process_word(self, word: str) -> list[str]:
+        logger.debug(f"Tokenizer: processing word '{word}'")
         tokens: list[str] = [word]
 
         # Apply splitters in order (priority: punctuation first)
         if self.split_punct:
             tokens = self._apply_splitter(tokens, self.punct_splitter)
+            logger.debug(f"After punctuation: {tokens}")
 
         # Split plural suffix before clitics
         tokens = self._apply_splitter(tokens, self.plural_splitter)
+        logger.debug(f"After plural splitting: {tokens}")
 
         if self.split_clitics:
             tokens = self._apply_splitter(tokens, self.clitic_splitter)
+            logger.debug(f"After clitic splitting: {tokens}")
 
         # Apply remaining splitters
         tokens = self._apply_splitter(tokens, self.redup_splitter)
+        logger.debug(f"After reduplication: {tokens}")
+
         tokens = self._apply_splitter(tokens, self.compound_splitter)
+        logger.debug(f"After compound splitting: {tokens}")
 
         return tokens
 
