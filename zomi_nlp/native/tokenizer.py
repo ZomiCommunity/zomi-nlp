@@ -1,5 +1,4 @@
 # zomi_nlp/native/tokenizer.py
-
 """Zomi tokenizer and sentence splitter.
 
 Features:
@@ -7,6 +6,7 @@ Features:
 - Punctuation splitting anywhere in the word
 - Reduplication with Zomi syllable validation
 - Compound word splitting
+- Plural suffix splitting for nouns
 - Token spans
 - Sentence splitting with abbreviation handling
 """
@@ -56,8 +56,8 @@ class CliticSplitter:
     """Split Zomi clitics, including multi‑clitic chains."""
 
     CLITICS = [
-        "ngei", "hiam", "sawn", "khin", "loin", "leh", "veh",
-        "pah", "te", "maw", "kei", "hen", "uh", "ta", "ve", "le", "hi"
+        "in", "ngei", "hiam", "sawn", "khin", "loin", "leh", "veh",
+        "pah", "maw", "kei", "hen", "uh", "ta", "ve", "le", "hi"
     ]
 
     def __init__(self):
@@ -145,6 +145,66 @@ class CompoundSplitter:
         return tokens
 
 
+class PluralSuffixSplitter:
+    """Split Zomi plural suffix -te from nouns ONLY.
+
+    Rules:
+    - Split -te from nouns: sangnaupangte → sangnaupang + te
+    - NEVER split pronouns: amaute, eite, kote, note, etc.
+
+    Examples:
+    - sangnaupangte → sangnaupang + te (noun plural)
+    - mite → mi + te (people)
+    - naute → nau + te (children)
+    - amaute → amaute (pronoun, no split)
+    - eite → eite (pronoun, no split)
+    - kote → kote (pronoun, no split)
+    """
+
+    # Pronouns that should NEVER be split (already plural or emphatic)
+    INDIVISIBLE_PRONOUNS = {
+        # Personal pronouns
+        "ka", "kei", "na", "nang", "a", "amah", "amau", "amaute",
+        "ei", "eite", "ih", "nin", "pai",
+        # Interrogative pronouns
+        "ko", "kote", "note", "nodan", "bang", "kuate",
+        "kua", "kuamah",
+    }
+
+    # Nouns that CAN take plural -te suffix
+    SPLITTABLE_NOUNS = {
+        "sangnaupang",  # student → students
+        "mi",           # person → people
+        "nau",          # child → children
+        "tapa",         # son → sons
+        "tanu",         # daughter → daughters
+        "lawm",         # friend → friends
+        "galkap",       # soldier → soldiers
+    }
+
+    PLURAL_SUFFIX = "te"
+
+    def split(self, word: str) -> list[str]:
+        """Split plural suffix -te from nouns only."""
+        word_lower = word.lower()
+
+        # NEVER split pronouns
+        if word_lower in self.INDIVISIBLE_PRONOUNS:
+            return [word]
+
+        # Check if word ends with 'te' and is long enough
+        if word_lower.endswith(self.PLURAL_SUFFIX) and len(word_lower) > len(self.PLURAL_SUFFIX):
+            base = word_lower[:-len(self.PLURAL_SUFFIX)]
+
+            # Split only if base is a noun that takes plural
+            if base in self.SPLITTABLE_NOUNS:
+                # Preserve original case
+                original_base = word[:-len(self.PLURAL_SUFFIX)]
+                return [original_base, self.PLURAL_SUFFIX]
+
+        return [word]
+
+
 # -----------------------------
 # Tokenizer
 # -----------------------------
@@ -160,6 +220,7 @@ class ZomiTokenizer:
         self.punct_splitter = PunctuationSplitter()
         self.redup_splitter = ReduplicationSplitter()
         self.compound_splitter = CompoundSplitter()
+        self.plural_splitter = PluralSuffixSplitter()  # ← ADD THIS
 
     def tokenize(self, text: str) -> list[str]:
         if not text:
@@ -177,13 +238,22 @@ class ZomiTokenizer:
     def _process_word(self, word: str) -> list[str]:
         tokens: list[str] = [word]
 
+        # Apply splitters in order (priority: punctuation first)
         if self.split_punct:
             tokens = self._apply_splitter(tokens, self.punct_splitter)
+
+        # Split plural suffix before clitics
+        tokens = self._apply_splitter(tokens, self.plural_splitter)
+        # print(f"After plural splitting: {tokens}")  # Debug print
 
         if self.split_clitics:
             tokens = self._apply_splitter(tokens, self.clitic_splitter)
 
+        # print(f"After clitic splitting: {tokens}")  # Debug print
+
+        # Apply remaining splitters
         tokens = self._apply_splitter(tokens, self.redup_splitter)
+        # print(f"After reduplication splitting: {tokens}")  # Debug print
         tokens = self._apply_splitter(tokens, self.compound_splitter)
 
         return tokens
@@ -229,7 +299,6 @@ class ZomiSentenceSplitter:
     Avoids look‑behind (Python limitation).
     """
 
-
     ABBREVIATIONS = {
         "mr", "mrs", "ms", "dr", "prof", "rev", "hon",
         "vs", "etc", "e.g", "i.e", "cf", "al",
@@ -274,4 +343,3 @@ class ZomiSentenceSplitter:
             sentences.append(current.strip())
 
         return sentences
-

@@ -62,6 +62,23 @@ class TestZomiTokenizer:
         tokens = tokenizer.tokenize("Ka Pai Ve.")
         assert tokens[0] == "Ka"  # Preserves case
 
+    def test_plural_splitting(self, tokenizer):
+        """Test plural splitting behavior for nouns and pronouns."""
+        test_cases = [
+            ("sangnaupangte", ["sangnaupang", "te"]),  # Noun plural - SPLIT
+            ("mite", ["mi", "te"]),                    # Noun plural - SPLIT
+            ("naute", ["nau", "te"]),                  # Noun plural - SPLIT
+            ("amaute", ["amaute"]),                    # Pronoun - NO SPLIT
+            ("eite", ["eite"]),                        # Pronoun - NO SPLIT
+            ("kote", ["kote"]),                        # Pronoun - NO SPLIT
+            ("note", ["note"]),                        # Pronoun - NO SPLIT
+        ]
+
+        for word, expected in test_cases:
+            result = tokenizer.tokenize(word)
+            print(f"{word:<15} → {result}")
+            assert result == expected
+
 
 class TestZomiSentenceSplitter:
     """Test sentence splitting."""
