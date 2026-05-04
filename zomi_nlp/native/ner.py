@@ -199,14 +199,11 @@ class ZomiNER:
         """Extract entities using contextual clues."""
         entities = []
 
-        print(f"DEBUG: tokens = {tokens}")  # Temporary debug
-
         for i, token in enumerate(tokens):
             token_lower = token.lower()
 
             # Date indicators in context (fallback if gazetteer missed)
             if token_lower in self.DATE_INDICATORS:
-                print(f"DEBUG: Found date indicator '{token}' at position {i}")  # Temporary debug
                 # Look ahead for number
                 if i + 1 < len(tokens) and (tokens[i + 1].isdigit() or \
                                             tokens[i + 1] in self.NUMERIC_WORDS):

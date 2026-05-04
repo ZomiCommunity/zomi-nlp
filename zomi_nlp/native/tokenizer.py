@@ -244,16 +244,12 @@ class ZomiTokenizer:
 
         # Split plural suffix before clitics
         tokens = self._apply_splitter(tokens, self.plural_splitter)
-        # print(f"After plural splitting: {tokens}")  # Debug print
 
         if self.split_clitics:
             tokens = self._apply_splitter(tokens, self.clitic_splitter)
 
-        # print(f"After clitic splitting: {tokens}")  # Debug print
-
         # Apply remaining splitters
         tokens = self._apply_splitter(tokens, self.redup_splitter)
-        # print(f"After reduplication splitting: {tokens}")  # Debug print
         tokens = self._apply_splitter(tokens, self.compound_splitter)
 
         return tokens
