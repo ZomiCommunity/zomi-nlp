@@ -167,7 +167,7 @@ class PluralSuffixSplitter:
     # Pronouns that should NEVER be split (already plural or emphatic)
     INDIVISIBLE_PRONOUNS = {
         # Personal pronouns
-        "ka", "kei", "na", "nang", "a", "amah", "amau", "amaute",
+        "ka", "kei", "keiman", "na", "nang", "a", "amah", "aman", "amau", "amaute",
         "ei", "eite", "ih", "nin", "pai",
         # Interrogative pronouns
         "ko", "kote", "note", "nodan", "bang", "kuate",

@@ -75,7 +75,7 @@ class ZomiDependencyParser:
     ERGATIVE_MARKERS = {"in", "tawh"}
 
     # Topic markers
-    TOPIC_MARKERS = {"pen", "cIn", "te", "leh"}
+    TOPIC_MARKERS = {"pen", "cin", "te", "leh"}
 
     def __init__(self):
         """Initialize dependency parser."""
@@ -219,6 +219,8 @@ class ZomiDependencyParser:
 
         # Topic markers
         if upos == "PART" and form in self.TOPIC_MARKERS:
+            if form.lower() == "pen":
+                return "discourse"
             return "mark"
 
         # Discourse particles (sentence final)

@@ -160,6 +160,8 @@ ZOMI_LEXICON = {
 
     # Adjectives
     "hawmpi": {"lemma": "hawmpi", "upos": "ADJ", "feats": "_"},
+    "hoih" : {"lemma": "hoih", "upos": "ADJ", "feats": "_"},
+    "hoihlo" : {"lemma": "hoih", "upos": "ADJ", "feats": "_"},
 
     # Numbers
     "khat": {"lemma": "khat", "upos": "NUM", "feats": "NumType=Card"},

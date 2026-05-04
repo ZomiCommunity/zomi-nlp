@@ -44,6 +44,7 @@ class ZomiLemmatizer:
         (r'ngei$', ''),    # Perfective
         (r'khin$', ''),    # Perfective
         (r'kei$', ''),     # Negative
+        (r'lo$', ''),    # Negative
         (r'loin$', ''),    # Negative
         (r'hen$', ''),     # Imperative
         (r'uh$', 'u'),     # Plural (u is stem form)
@@ -95,9 +96,9 @@ class ZomiLemmatizer:
         # Pronouns (lemmatize to base form)
         "ka": "ka",
         "ke": "ka",
-        "kaimah": "ka",
+        "keimah": "keimah",
         "na": "na",
-        "nang": "na",
+        "nang": "nang",
         "amah": "amah",
         "amau": "amau",
         "eite": "eite",
