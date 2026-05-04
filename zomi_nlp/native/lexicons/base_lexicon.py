@@ -71,27 +71,21 @@ def dict_filter(data, key, value):
 # MAIN LEXICON
 # ============================================================
 ZOMI_LEXICON = {
-    # Prifixes
+    # Prefixes
     "ka": {"lemma": "ka", "upos": "PRON", "morph_type": "prefix", "gloss": "1SG",
            "feats": "Number=Sing|Person=1|PronType=Prs", "deprel": "nsubj"},
     "ke": {"lemma": "ke", "upos": "PRON", "morph_type": "prefix", "gloss": "1SG",
            "feats": "Person=1|Number=Sing", "deprel": "nsubj"},
-    "na": {"lemma": "na", "upos": "PRON", "morph_type": "prefix", "gloss": "2SG",
-           "feats": "Person=2|Number=Sing", "deprel": "nsubj"},
-    "nang": {"lemma": "nang", "upos": "PRON", "morph_type": "prefix", "gloss": "2SG",
-             "feats": "Person=2|Number=Sing", "deprel": "nsubj"},
     "a": {"lemma": "a","upos": "PRON", 	"morph_type":"prefix", 	"gloss":"3SG",
-          "feats":"Person=3|Number=Sing", "deprel": "nsubj"},
+          "feats":"Number=Sing|Person=3|PronType=Prs", "deprel": "nsubj"},
     "i": {"lemma": "i", "upos": "PRON", "morph_type": "prefix","gloss": "1PL",
-          "feats": "Person=1|Number=Plur", "deprel": "nsubj"},
+          "feats": "Number=Plur|Person=1|PronType=Prs", "deprel": "nsubj"},
     "nin": {"lemma": "nin", "upos": "PRON", "morph_type": "prefix", "gloss": "1PL",
             "feats": "Person=1|Number=Plur", "deprel": "nsubj"},
     "hong": {"lemma": "hong", "upos": "PRON", "morph_type": "prefix", "gloss": "2SG",
-             "feats": "Directional=Yes", "deprel": "expl"},
-    "pai": {"lemma": "pai", "upos": "PRON", "morph_type": "prefix", "gloss": "PL",
-            "feats": "Number=Plur", "deprel": "nsubj"},
+             "feats": "Directional=Yes|Person=2|Obj=Yes", "deprel": "expl"},
     "ih": {"lemma": "ih", "upos": "PRON", "morph_type": "prefix", "gloss": "1PL",
-           "feats": "Person=1|Number=Plur", "deprel": "nsubj"},
+           "feats": "Number=Plur|Person=1|PronType=Prs", "deprel": "nsubj"},
 
     # Suffixes/particles
     "ve": {"lemma": "ve", "upos": "PART", "morph_type": "suffix", "gloss": "POL",
@@ -111,8 +105,7 @@ ZOMI_LEXICON = {
     "leh": {"lemma": "leh", "upos": "PART", "morph_type": "suffix", "gloss": "COND",
             "feats": "Conditional=Yes", "deprel": "discourse"},
     "pah": {"lemma": "pah", "upos": "PART","morph_type": "suffix", "gloss":"TEMP",
-            "feats":"Temporal=Yes|Redup=Yes", "deprel": "discourse"},
-    # "pah": {"lemma": "pah", "upos": "ADV", "feats": "Aspect=Perf", "deprel": "advmod"},
+            "feats":"Aspect=Perf|Temporal=Yes|Redup=Yes", "deprel": "advmod"},
     "sawn": {"lemma": "sawn","upos": "PART", "morph_type" : "suffix",	"gloss":"TEMP",
              "feats": "Temporal=Yes", "deprel": "discourse"},
     "ngei": {"lemma": "ngei", "upos":"PART", "morph_type":"suffix", "gloss":"PERF",
@@ -144,14 +137,11 @@ ZOMI_LEXICON = {
     "sangnaupangte": {"lemma": "sangnaupangte", "upos": "NOUN", "feats": "Number=Plur"},
 
     # Pronouns
-    # "ka": {"lemma": "ka", "upos": "PRON", "feats": "Number=Sing|Person=1|PronType=Prs",
-    #        "deprel": "nsubj"},
-    "ih": {"lemma": "ih", "upos": "PRON", "feats": "Number=Plur|Person=1|PronType=Prs"},
-    "na": {"lemma": "na", "upos": "PRON", "feats": "Number=Sing|Person=2|PronType=Prs"},
-    "nang": {"lemma": "nang", "upos": "PRON", "feats": "Number=Sing|Person=2|PronType=Prs"},
+    "na": {"lemma": "na", "upos": "PRON", "gloss": "2SG",
+           "feats": "Number=Sing|Person=2|PronType=Prs", "deprel": "nsubj"},
+    "nang": {"lemma": "nang", "upos": "PRON", "gloss": "2SG",
+             "feats": "Number=Sing|Person=2|PronType=Prs", "deprel": "nsubj"},
     "kua": {"lemma": "kua", "upos": "PRON", "feats": "PronType=Int"},
-    "a": {"lemma": "a", "upos": "PRON", "feats": "Number=Sing|Person=3|PronType=Prs"},
-    "i": {"lemma": "i", "upos": "PRON", "feats": "Number=Plur|Person=1|PronType=Prs"},
     "amaute": {"lemma": "amaute", "upos": "PRON", "feats": "Number=Plur|Person=3|PronType=Prs"},
     "kote" : {"lemma": "kote", "upos": "PRON", "feats": "Number=Plur|Person=3|PronType=Prs"},
     "eite": {"lemma": "eite", "upos": "PRON", "feats": "Number=Plur|Person=1"},
@@ -159,13 +149,14 @@ ZOMI_LEXICON = {
 
     # Verbs
     "ne": {"lemma": "ne", "upos": "VERB", "feats": "VerbForm=Fin"},
-    "pai": {"lemma": "pai", "upos": "VERB", "feats": "VerbForm=Fin", "deprel": "root"},
     "pia": {"lemma": "pia", "upos": "VERB", "feats": "VerbForm=Fin"},
     "piang": {"lemma": "piang", "upos": "VERB", "feats": "VerbForm=Fin"},
     "piangsak": {"lemma": "piangsak", "upos": "VERB", "feats": "Voice=Cau|VerbForm=Fin"},
     "om": {"lemma": "om", "upos": "VERB", "feats": "_"},
     "nei": {"lemma": "nei", "upos": "VERB", "feats": "VerbForm=Ger"},
     "ci": {"lemma": "ci", "upos": "VERB", "feats": "VerbForm=Fin"},
+    "pai": {"lemma": "pai", "upos": "VERB", "gloss": "PL", # "morph_type": "prefix",
+            "feats": "VerbForm=Fin", "deprel": "root"},
 
     # Adjectives
     "hawmpi": {"lemma": "hawmpi", "upos": "ADJ", "feats": "_"},
@@ -174,7 +165,6 @@ ZOMI_LEXICON = {
     "khat": {"lemma": "khat", "upos": "NUM", "feats": "NumType=Card"},
 
     # Adverbs
-    "hong": {"lemma": "hong", "upos": "PRON", "feats": "Person=2|Obj=Yes", "deprel": "expl"},
     "mengmeng": {"lemma": "mengmeng", "upos": "ADV", "feats": "_", "deprel": "advmod"},
     "kik": {"lemma": "kik", "upos": "ADV", "feats": "Aspect=Iter", "deprel": "advmod"},
     # "pah": {"lemma": "pah", "upos": "ADV", "feats": "Aspect=Perf", "deprel": "advmod"},
